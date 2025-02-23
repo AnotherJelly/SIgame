@@ -13,47 +13,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/SIgame', {
 .then(() => console.log('MongoDB подключена'))
 .catch(err => console.error('Ошибка подключения:', err));
 
-/*
-const Round = {
-    name: "Round 1",
-    categories:
-    [
-        {
-            name: "category 1",
-            questions:                
-            [   
-                {
-                    type: "test",
-                    question: "Question 1",
-                    answer: "Answer 1"
-                },
-                {
-                    type: "test",
-                    question: "Question 2",
-                    answer: "Answer 2"
-                },
-            ]
-        },
-        {
-            name: "category 2",
-            questions:                
-            [   
-                {
-                    type: "test",
-                    question: "Question 1",
-                    answer: "Answer 1"
-                },
-                {
-                    type: "test",
-                    question: "Question 2",
-                    answer: "Answer 2"
-                },
-            ]
-        }
-    ]
-}
-*/
-
 const Round = mongoose.model('Round', new mongoose.Schema({
     id: { type: String, required: true },
     name: { type: String, required: true },
