@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const settingsApp = {
     timer: 60,
+    roundIntroPause: 3000, // 3 sec
 };
 
 function Button({ value, question, onClick, isButtonBlinking }) {
@@ -15,7 +16,7 @@ function Button({ value, question, onClick, isButtonBlinking }) {
     );
 }
 
-function Category({ name, questions, onClick, answeredQuestions, questionText }) {
+function Category({ name, questions, onClick, answeredQuestions, questionText, roundIndex }) {
     return (
         <>
             <div className="category-title">{name}</div>
@@ -26,7 +27,7 @@ function Category({ name, questions, onClick, answeredQuestions, questionText })
                 return (
                     <Button
                         key={question.id}
-                        value={100 * (index + 1)}
+                        value={100 * (roundIndex + 1) * (index + 1)}
                         question={question}
                         onClick={onClick}
                         isButtonBlinking={questionText === question}
@@ -77,7 +78,7 @@ function Timer() {
     return <div className="timer">{time}</div>;
 }
 
-export default function CategoryGrid({ playersData, categories, onAwardPoints, onDeductPoints, resetAnswers }) {
+export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDeductPoints, resetAnswers }) {
   
     const [selectedQuestion, setSelectedQuestion] = useState(null);
     const [answeredQuestions, setAnsweredQuestions] = useState([]);
@@ -86,6 +87,36 @@ export default function CategoryGrid({ playersData, categories, onAwardPoints, o
 
     const [isShowAnswer, setisShowAnswer] = useState(false);
     const [isDisabledCloseBtn, setisDisabledCloseBtn] = useState(false);
+
+    const [activeRoundIndex, setActiveRoundIndex] = useState(0);
+    const [roundIntroText, setRoundIntroText] = useState('Раунд 1');
+    const [showRoundIntro, setShowRoundIntro] = useState(true);
+
+    const nextRound = () => {
+        setRoundIntroText(`Раунд ${activeRoundIndex + 2}`);
+        setShowRoundIntro(true);
+        setTimeout(() => {
+            setActiveRoundIndex(prev => prev + 1);
+            setShowRoundIntro(false);
+        }, settingsApp.roundIntroPause);
+    };
+
+    useEffect(() => {
+        const timer = setTimeout(() => setShowRoundIntro(false), settingsApp.roundIntroPause);
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        const allQuestions = rounds[activeRoundIndex]?.categories.flatMap(cat => cat.questions) || [];
+        const allAnswered = allQuestions.every(q => answeredQuestions.includes(q.id));
+    
+        if (allAnswered && activeRoundIndex < rounds.length - 1) {
+            nextRound();
+        } else if (allAnswered && activeRoundIndex == rounds.length - 1) {
+            setRoundIntroText(`Конец игры`);
+            setShowRoundIntro(true);
+        }
+    }, [answeredQuestions, activeRoundIndex, rounds]);
 
     const handleAward = (playerId) => {
         if (selectedQuestion) {
@@ -135,7 +166,11 @@ export default function CategoryGrid({ playersData, categories, onAwardPoints, o
         <div className="category-grid">
 
             <div className="desk-grid">
-                {selectedQuestion ? (
+                {showRoundIntro ? (
+                    <div className="question">
+                        <p>{roundIntroText}</p>
+                    </div>
+                ) : selectedQuestion ? (
                     <>
                         {!isShowAnswer && (
                             <Timer />
@@ -163,7 +198,7 @@ export default function CategoryGrid({ playersData, categories, onAwardPoints, o
                         </div>
                     </>
                 ) : (
-                    categories.map((category) => (
+                    rounds[activeRoundIndex]?.categories.map((category) => (
                         <Category
                             key={category.id}
                             name={category.name}
@@ -171,6 +206,7 @@ export default function CategoryGrid({ playersData, categories, onAwardPoints, o
                             onClick={handleButtonClick}
                             answeredQuestions={answeredQuestions}
                             questionText={isButtonBlinking}
+                            roundIndex={activeRoundIndex}
                         />
                     ))
                 )}

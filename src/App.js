@@ -13,11 +13,12 @@ export function App() {
 
    
     const [categories, setCategories] = useState([]);
+    const [rounds, setRounds] = useState([]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/categories")
+        fetch("http://localhost:5000/rounds")
             .then((res) => res.json())
-            .then((data) => setCategories(data))
+            .then((data) => setRounds(data))
             .catch((err) => console.error("Ошибка загрузки:", err));
     }, []);
 
@@ -26,16 +27,16 @@ export function App() {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
-    const saveChanges = (newPlayers, newCategories) => {
+    const saveChanges = (newPlayers, newRounds) => {
         setPlayersData(newPlayers);
-        setCategories(newCategories);
+        setRounds(newRounds);
     
-        fetch('http://localhost:5000/categories', {
+        fetch('http://localhost:5000/rounds', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(newCategories)
+            body: JSON.stringify(newRounds)
         })
             .then(response => response.text())
             .catch(error => console.error('Ошибка при отправке POST-запроса:', error));
@@ -77,20 +78,21 @@ export function App() {
             </button>
 
             <SettingsModal
+                rounds={rounds}
                 playersData={playersData}
-                categories={categories}
                 saveChanges={saveChanges}
                 closeModal={closeModal}
                 isModalOpen={isModalOpen}
             />
 
             <CategoryGrid 
-                playersData={playersData} 
-                categories={categories}
+                playersData={playersData}
+                rounds={rounds}
                 onAwardPoints={handleAwardPoints}
                 onDeductPoints={handleDeductPoints}
                 resetAnswers={handleResetAnswers}
             />
+
         </div>
     );
 }

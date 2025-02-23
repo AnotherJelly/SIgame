@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const settings = {
     maxPlayers: 6,
+    maxRounds: 3,
     maxCategories: 8,
     maxLengthPlayer: 30,
     maxLengthPoints: 10,
@@ -44,7 +45,7 @@ function InputWithDelete ( {id, value, placeholder, maxlength, onChange, onDelet
     );
 }
 
-function SettingsCategoryElement ( {category, catIndex, removeCategory, handleCategoryChange} ) {
+function SettingsCategoryElement ( {category, catIndex, removeCategory, handleCategoryChange, roundIndex} ) {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const toggleCollapse = () => {
@@ -66,7 +67,7 @@ function SettingsCategoryElement ( {category, catIndex, removeCategory, handleCa
                 <React.Fragment key={curQuestion.id}>
                     <InputText
                         id={curQuestion.id}
-                        text={`${100 * (qIndex + 1)}:`}
+                        text={`${100 * (roundIndex + 1) * (qIndex + 1)}:`}
                         value={curQuestion.text}
                         placeholder={`Вопрос ${qIndex + 1}`}
                         maxlength={settings.maxLengthQuestion}
@@ -166,62 +167,68 @@ function SettingsPlayersBlock ( {playersData, newPlayers, setNewPlayers} ) {
     );
 }
 
-function SettingsCategoryBlock ( {categories, newCategories, setNewCategories} ) {
+function SettingsCategoryBlock ( { id, roundIndex, categories, setNewCategories, removeRound } ) {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const toggleCollapse = () => {
+        setIsCollapsed(!isCollapsed);
+    };
     
     useEffect(() => {
-        setNewCategories(categories);
+        setNewCategories(categories, roundIndex);
     }, [categories]);
 
     const removeCategory = (id) => {
-        setNewCategories(newCategories.filter((category) => category.id !== id));
+        setNewCategories(categories.filter((category) => category.id !== id), roundIndex);
     };
 
     const addCategory = () => {
         const newCategory = {
             id: generateId(),
-            name: `Category ${newCategories.length + 1}`,
+            name: `Category ${categories.length + 1}`,
             questions: [
                 {
                     id: generateId(),
                     questionType: "test",
-                    text: `Question ${newCategories.length * 5 + 1}`,
-                    answer: `Answer ${newCategories.length * 5 + 1}`
+                    text: `Question ${categories.length * 5 + 1}`,
+                    answer: `Answer ${categories.length * 5 + 1}`
                 },
                 {
                     id: generateId(),
                     questionType: "test",
-                    text: `Question ${newCategories.length * 5 + 2}`,
-                    answer: `Answer ${newCategories.length * 5 + 2}`
+                    text: `Question ${categories.length * 5 + 2}`,
+                    answer: `Answer ${categories.length * 5 + 2}`
                 },
                 {
                     id: generateId(),
                     questionType: "test",
-                    text: `Question ${newCategories.length * 5 + 3}`,
-                    answer: `Answer ${newCategories.length * 5 + 3}`
+                    text: `Question ${categories.length * 5 + 3}`,
+                    answer: `Answer ${categories.length * 5 + 3}`
                 },
                 {
                     id: generateId(),
                     questionType: "test",
-                    text: `Question ${newCategories.length * 5 + 4}`,
-                    answer: `Answer ${newCategories.length * 5 + 4}`
+                    text: `Question ${categories.length * 5 + 4}`,
+                    answer: `Answer ${categories.length * 5 + 4}`
                 },
                 {
                     id: generateId(),
                     questionType: "test",
-                    text: `Question ${newCategories.length * 5 + 5}`,
-                    answer: `Answer ${newCategories.length * 5 + 5}`
+                    text: `Question ${categories.length * 5 + 5}`,
+                    answer: `Answer ${categories.length * 5 + 5}`
                 }
             ]
         };
     
         setNewCategories([
-            ...newCategories,
+            ...categories,
             newCategory,
-        ]);
+        ], roundIndex);
     };
 
     const handleCategoryChange = (catId, categoryName, questionId, value, field) => {
-        const updatedCategories = [...newCategories];
+        const updatedCategories = [...categories];
 
         const categoryIndex = updatedCategories.findIndex(category => category.id === catId);
         if (categoryIndex === -1) {
@@ -247,31 +254,126 @@ function SettingsCategoryBlock ( {categories, newCategories, setNewCategories} )
                     console.warn(`Неизвестное поле: ${field}`);
             }
         }
-        setNewCategories(updatedCategories);
+        setNewCategories(updatedCategories, roundIndex);
     };
 
     return (
         <div className="modal-content__players">
             <div className="modal-content__subtitle">
-                <span>Категории</span>
+                <div className="modal-content__subtitle--delete">
+                    <span>Раунд {roundIndex + 1}</span>
+                    <button className="" onClick={() => removeRound(id)}><i class="fas fa-times"></i></button>
+                </div>
+                <button className="modal-content__collapse" onClick={toggleCollapse}>{isCollapsed ? 'Развернуть' : 'Свернуть'}</button>
             </div>
-            {newCategories.map((category, catIndex) => (
-                <SettingsCategoryElement
-                    key={category.id}
-                    category={category}
-                    catIndex={catIndex}
-                    removeCategory={removeCategory}
-                    handleCategoryChange={handleCategoryChange}
-                />
-            ))}
-            <button onClick={addCategory} className="modal-content__btn--add" disabled={newCategories.length >= settings.maxCategories}>Добавить категорию</button>
+            {!isCollapsed && (
+                <>
+                    {categories.map((category, catIndex) => (
+                        <SettingsCategoryElement
+                            key={category.id}
+                            category={category}
+                            catIndex={catIndex}
+                            removeCategory={removeCategory}
+                            handleCategoryChange={handleCategoryChange}
+                            roundIndex={roundIndex}
+                        />
+                    ))}
+                    <button onClick={addCategory} className="modal-content__btn--add" disabled={categories.length >= settings.maxCategories}>Добавить категорию</button>
+                </>
+            )}
         </div>
     );
 }
 
-export default function SettingsModal ({ playersData, categories, saveChanges, closeModal, isModalOpen }) {
+function SettingsRoundBlock ( { rounds, newRounds, setNewRounds } ) {
 
-    const [newCategories, setNewCategories] = useState(categories);
+    useEffect(() => {
+        setNewRounds(rounds);
+    }, [rounds]);
+
+    const removeRound = (id) => {
+        setNewRounds(newRounds.filter((round) => round.id !== id));
+    };
+
+    const addRound = () => {
+        const newRound = {
+            id: generateId(),
+            name: `Round ${newRounds.length + 1}`,
+            categories: [
+                {
+                    id: generateId(),
+                    name: `Category`,
+                    questions: [
+                        {
+                            id: generateId(),
+                            questionType: "test",
+                            text: `Question`,
+                            answer: `Answer`
+                        },
+                        {
+                            id: generateId(),
+                            questionType: "test",
+                            text: `Question`,
+                            answer: `Answer`
+                        },
+                        {
+                            id: generateId(),
+                            questionType: "test",
+                            text: `Question`,
+                            answer: `Answer`
+                        },
+                        {
+                            id: generateId(),
+                            questionType: "test",
+                            text: `Question`,
+                            answer: `Answer`
+                        },
+                        {
+                            id: generateId(),
+                            questionType: "test",
+                            text: `Question`,
+                            answer: `Answer`
+                        }
+                    ]
+                }
+            ]
+        };
+    
+        setNewRounds([
+            ...newRounds,
+            newRound,
+        ]);
+    };
+
+    const setNewCategories = (updatedCategories, roundIndex) => {
+        const updatedRounds = [...newRounds];
+        updatedRounds[roundIndex] = {
+            ...updatedRounds[roundIndex],
+            categories: updatedCategories,
+        };
+        setNewRounds(updatedRounds);
+    }
+
+    return (
+        <div className="modal-content__players">
+            {newRounds.map((round, roundIndex) => (
+                <SettingsCategoryBlock
+                    key={round.id}
+                    id={round.id}
+                    roundIndex={roundIndex}
+                    categories={round.categories}
+                    setNewCategories={setNewCategories}
+                    removeRound={removeRound}
+                />
+            ))}
+            <button onClick={addRound} className="modal-content__btn--add modal-content__btn--wide" disabled={newRounds.length >= settings.maxRounds}>Добавить раунд</button>
+        </div>
+    );
+}
+
+export default function SettingsModal ({ rounds, playersData, saveChanges, closeModal, isModalOpen }) {
+
+    const [newRounds, setNewRounds] = useState(rounds);
     const [newPlayers, setNewPlayers] = useState(playersData);
 
     return (
@@ -291,14 +393,14 @@ export default function SettingsModal ({ playersData, categories, saveChanges, c
                         setNewPlayers={setNewPlayers}
                     />
 
-                    <SettingsCategoryBlock
-                        categories={categories}
-                        newCategories={newCategories}
-                        setNewCategories={setNewCategories}
+                    <SettingsRoundBlock
+                        rounds={rounds}
+                        newRounds={newRounds}
+                        setNewRounds={setNewRounds}
                     />
                 </div>
 
-                <button className="modal-content__btn--save" onClick={() => saveChanges(newPlayers, newCategories)}>Сохранить изменения</button>
+                <button className="modal-content__btn--save" onClick={() => saveChanges(newPlayers, newRounds)}>Сохранить изменения</button>
                 
             </div>
         </div>

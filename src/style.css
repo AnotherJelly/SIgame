@@ -217,7 +217,33 @@ body {
 .modal-content__subtitle {
     text-align: center;
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    flex-direction: column;
+}
+.modal-content__subtitle--delete {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+    width: 100%;
+}
+.modal-content__subtitle--delete button {
+    background-color: #900000;
+    color: white;
+    border: none;
+    padding: 3px 6px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: .3s;
+}
+.modal-content__subtitle--delete button:active, .modal-content__subtitle--delete button:hover {
+    opacity: .7;
 }
 .modal-content-row {
     display: flex;
@@ -294,6 +320,12 @@ body {
 }
 .modal-content__btn--add:hover:not(:disabled), .modal-content__btn--add:active:not(:disabled) {
     max-width: 100%;
+}
+.modal-content__btn--wide {
+    max-width: 100%;
+}
+.modal-content__btn--wide:hover:not(:disabled), .modal-content__btn--wide:active:not(:disabled) {
+    background-color: #4caf50;
 }
 .modal-content__btn--save {
     background-color: #4CAF50;
