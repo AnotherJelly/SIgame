@@ -54,34 +54,39 @@ const Round = {
 }
 */
 
-const Category = mongoose.model('Category', new mongoose.Schema({
+const Round = mongoose.model('Round', new mongoose.Schema({
     id: { type: String, required: true },
     name: { type: String, required: true },
-    questions: [
+    categories: [
         {
             id: { type: String, required: true },
-            questionType: { type: String, required: true },
-            text: { type: String, required: true },
-            answer: { type: String, required: true }
+            name: { type: String, required: true },
+            questions: [
+                {
+                    id: { type: String, required: true },
+                    questionType: { type: String, required: true },
+                    text: { type: String, required: true },
+                    answer: { type: String, required: true }
+                }
+            ]
         }
     ]
 }));
 
-app.get('/categories', async (req, res) => {
+app.get('/rounds', async (req, res) => {
     try {
-        const categories = await Category.find();
-        res.json(categories);
+        const rounds = await Round.find();
+        res.json(rounds);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-app.post('/categories', async (req, res) => {
+app.post('/rounds', async (req, res) => {
     try {
-
-        await Category.deleteMany({});
-        const newCategories = await Category.insertMany(req.body);
-        res.status(201).json(newCategories);
+        await Round.deleteMany({});
+        const newRounds = await Round.insertMany(req.body);
+        res.status(201).json(newRounds);
     } catch (err) {
         console.error("Ошибка при сохранении:", err);
         res.status(400).json({ message: err.message });
