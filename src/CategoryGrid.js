@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 const settingsApp = {
     timer: 60,
     roundIntroPause: 3000, // 3 sec
+    answerTime: 15
 };
 
 function Button({ value, question, onClick, isButtonBlinking }) {
@@ -38,42 +39,63 @@ function Category({ name, questions, onClick, answeredQuestions, questionText, r
     );
 }
 
-function Player({ player, onAwardPoints, onDeductPoints, isQuestionSelected, isShowAnswer }) {
+function Player({ player, onAwardPoints, onDeductPoints, isQuestionSelected, isShowAnswer, setisTimerPaused, answerTime }) {
+    const [isCanAnswer, setisCanAnswer] = useState(false);
+
+    useEffect(() => {
+        setisCanAnswer(false);
+    }, [isQuestionSelected]);
+
+    const handleCanAnswer = () => {
+        setisTimerPaused(true);
+        setisCanAnswer(true);
+    };
+    
     return (
         <div className="player">
-            {isQuestionSelected && !(player.hasAnswered) && (
-                <div className="block-icons">
-
-                    <button className="button-icons" onClick={() => onAwardPoints(player.id)}>
-                        <i className="fas fa-check"></i>
-                    </button>
-                    
-                    <button className="button-icons" onClick={() => onDeductPoints(player.id)}>
-                        <i className="fas fa-times"></i>
-                    </button>
-
-                </div>
-            )}
-            {(isQuestionSelected || isShowAnswer) && (
-                <textarea disabled={player.hasAnswered || isShowAnswer}></textarea>
-            )}
+                {isQuestionSelected && !(player.hasAnswered) && isCanAnswer && (
+                    <>
+                        <div className="player-timer">
+                            <div className="player-timer__line" style={{
+                                animation: `slide-out ${answerTime}s linear forwards`
+                            }}></div>
+                        </div>
+                        <div className="block-icons">
+        
+                            <button className="button-icons" onClick={() => onAwardPoints(player.id)}>
+                                <i className="fas fa-check"></i>
+                            </button>
+                            
+                            <button className="button-icons" onClick={() => onDeductPoints(player.id)}>
+                                <i className="fas fa-times"></i>
+                            </button>
+        
+                        </div>
+                    </>
+                )}
+                {((isShowAnswer && player.hasAnswered) || (isCanAnswer && isQuestionSelected)) && (
+                    <textarea disabled={player.hasAnswered || isShowAnswer}></textarea>
+                )}
+                {isQuestionSelected && !isCanAnswer && (
+                    <button className="button-answer" onClick={handleCanAnswer}>Ответить</button>
+                )}
             <div className="player-block">{player.name}</div>
             <div className="player-block player-block__score">{player.points}</div>
         </div>
     );
 }
 
-function Timer() {
-    const [time, setTime] = useState(settingsApp.timer);
+function Timer({timer, isTimerPaused}) {
+    const [time, setTime] = useState(timer);
 
     useEffect(() => {
-        if (time > 0) {
+        if (time > 0 && !isTimerPaused) {
             const timer = setInterval(() => {
                 setTime(prevTime => prevTime - 1);
             }, 1000);
             return () => clearInterval(timer);
         }
-    }, [time]);
+    }, [time, isTimerPaused]);
 
     return <div className="timer">{time}</div>;
 }
@@ -91,6 +113,8 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
     const [activeRoundIndex, setActiveRoundIndex] = useState(0);
     const [roundIntroText, setRoundIntroText] = useState('Раунд 1');
     const [showRoundIntro, setShowRoundIntro] = useState(true);
+
+    const [isTimerPaused, setisTimerPaused] = useState(false);
 
     const nextRound = () => {
         setRoundIntroText(`Раунд ${activeRoundIndex + 2}`);
@@ -124,6 +148,7 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
 
             handleShowAnswer();
             setisDisabledCloseBtn(true);
+            setisTimerPaused(false);
             setTimeout(() => {
                 setisDisabledCloseBtn(false);
                 setisShowAnswer(false);
@@ -136,6 +161,7 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
     const handleDeduct = (playerId) => {
         if (selectedQuestion) {
             onDeductPoints(playerId, selectedQuestion.value);
+            setisTimerPaused(false);
         }
     };
 
@@ -155,6 +181,7 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
         setSelectedQuestion(null);
         resetAnswers();
         setisShowAnswer(false);
+        setisTimerPaused(false);
     };
 
     const handleShowAnswer = () => {
@@ -173,7 +200,10 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
                 ) : selectedQuestion ? (
                     <>
                         {!isShowAnswer && (
-                            <Timer />
+                            <Timer
+                                timer={settingsApp.timer}
+                                isTimerPaused={isTimerPaused}
+                            />
                         )}
                         <div className="question">
                             {!isShowAnswer ? (
@@ -220,6 +250,8 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
                         onDeductPoints={handleDeduct}
                         isQuestionSelected={isQuestionSelected}
                         isShowAnswer={isShowAnswer}
+                        setisTimerPaused={setisTimerPaused}
+                        answerTime={settingsApp.answerTime}
                     />
                 ))}
             </div>

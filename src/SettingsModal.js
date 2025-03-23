@@ -123,11 +123,11 @@ function SettingsPlayersBlock ( {playersData, newPlayers, setNewPlayers} ) {
     };
 
     const addPlayer = () => {
-        if (newPlayers.length < 6) {
-        setNewPlayers([
-            ...newPlayers,
-            { id: generateId(), name: `Игрок ${newPlayers.length + 1}`, points: 0, hasAnswered: false },
-        ]);
+        if (newPlayers.length < settings.maxPlayers) {
+            setNewPlayers([
+                ...newPlayers,
+                { id: generateId(), name: `Игрок ${newPlayers.length + 1}`, points: 0, hasAnswered: false },
+            ]);
         }
     };
 
@@ -160,7 +160,7 @@ function SettingsPlayersBlock ( {playersData, newPlayers, setNewPlayers} ) {
                     />
                 </div>
             ))}
-            <button onClick={addPlayer} className="modal-content__btn--add" disabled={newPlayers.length >= settings.maxPlayers}>
+            <button onClick={addPlayer} className="modal-content__btn--add" disabled={newPlayers.length > settings.maxPlayers}>
                 Добавить игрока
             </button>
         </div>
@@ -262,7 +262,7 @@ function SettingsCategoryBlock ( { id, roundIndex, categories, setNewCategories,
             <div className="modal-content__subtitle">
                 <div className="modal-content__subtitle--delete">
                     <span>Раунд {roundIndex + 1}</span>
-                    <button className="" onClick={() => removeRound(id)}><i class="fas fa-times"></i></button>
+                    <button className="" onClick={() => removeRound(id)}><i className="fas fa-times"></i></button>
                 </div>
                 <button className="modal-content__collapse" onClick={toggleCollapse}>{isCollapsed ? 'Развернуть' : 'Свернуть'}</button>
             </div>
