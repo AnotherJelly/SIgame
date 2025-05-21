@@ -116,6 +116,8 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
 
     const [isTimerPaused, setisTimerPaused] = useState(false);
 
+    const [specialLabel, setSpecialLabel] = useState(null);
+
     const nextRound = () => {
         setRoundIntroText(`Раунд ${activeRoundIndex + 2}`);
         setShowRoundIntro(true);
@@ -170,8 +172,13 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
         setTimeout(() => {
             setIsButtonBlinking(null);
             setisQuestionSelected(true);
-            if (!answeredQuestions.some(q => q === question.id)) {
-                setSelectedQuestion({ value, question });
+            if (!answeredQuestions.includes(question.id)) {
+                if (['cat', 'bet'].includes(question.questionType)) {
+                    const label = question.questionType === 'cat' ? 'Кот в мешке' : 'Вопрос со ставкой';
+                    setSpecialLabel({ label, value, question });
+                } else {
+                    setSelectedQuestion({ value, question });
+                }
             }
         }, 2000);
     };
@@ -188,59 +195,87 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
         setisQuestionSelected(false);
         setisShowAnswer(true);
     };
+
+    const renderRoundIntro = (text) => (
+        <div className="question">
+            <p>{text}</p>
+        </div>
+    );
+
+    const renderSpecialLabel = (label) => (
+        <div className="question">
+            <p className="special-label">{label.label}</p>
+            <button
+                className="button"
+                onClick={() => {
+                    setSelectedQuestion({ value: label.value, question: label.question });
+                    setSpecialLabel(null);
+                }}
+            >
+                Показать вопрос
+            </button>
+        </div>
+    );
+
+    const renderSelectedQuestion = ({ question }) => (
+        <>
+            {!isShowAnswer && (
+                <Timer timer={settingsApp.timer} isTimerPaused={isTimerPaused} />
+            )}
+
+            <div className="question">
+            {!isShowAnswer ? (
+                <>
+                    <p>{question.text}</p>
+                    <button className="button" onClick={handleShowAnswer}>
+                        Показать ответ
+                    </button>
+                </>
+            ) : (
+                <>
+                    <p className="answer-text">{question.answer}</p>
+                    <button
+                        className="button"
+                        onClick={handleAnswer}
+                        disabled={isDisabledCloseBtn}
+                    >
+                        Закрыть вопрос
+                    </button>
+                </>
+            )}
+            </div>
+        </>
+    );
+
+    const renderCategories = () =>
+        rounds[activeRoundIndex]?.categories.map((category) => (
+            <Category
+                key={category.id}
+                name={category.name}
+                questions={category.questions}
+                onClick={handleButtonClick}
+                answeredQuestions={answeredQuestions}
+                questionText={isButtonBlinking}
+                roundIndex={activeRoundIndex}
+            />
+        )
+    );
+
   
     return (
         <div className="category-grid">
-
             <div className="desk-grid">
                 {showRoundIntro ? (
-                    <div className="question">
-                        <p>{roundIntroText}</p>
-                    </div>
+                    renderRoundIntro(roundIntroText)
+                ) : specialLabel ? (
+                    renderSpecialLabel(specialLabel)
                 ) : selectedQuestion ? (
-                    <>
-                        {!isShowAnswer && (
-                            <Timer
-                                timer={settingsApp.timer}
-                                isTimerPaused={isTimerPaused}
-                            />
-                        )}
-                        <div className="question">
-                            {!isShowAnswer ? (
-                                <>
-                                    <p>
-                                        {selectedQuestion.question.text}
-                                    </p>
-                                    <button className="button" onClick={handleShowAnswer}>
-                                        Показать ответ
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <p className="answer-text" >
-                                        {selectedQuestion.question.answer}
-                                    </p>
-                                    <button className="button" onClick={handleAnswer} disabled={isDisabledCloseBtn}>
-                                        Закрыть вопрос
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </>
+                    renderSelectedQuestion(selectedQuestion)
                 ) : (
-                    rounds[activeRoundIndex]?.categories.map((category) => (
-                        <Category
-                            key={category.id}
-                            name={category.name}
-                            questions={category.questions}
-                            onClick={handleButtonClick}
-                            answeredQuestions={answeredQuestions}
-                            questionText={isButtonBlinking}
-                            roundIndex={activeRoundIndex}
-                        />
-                    ))
+                    renderCategories()
                 )}
             </div>
+
             <div className="players">
                 {playersData.map((player) => (
                     <Player

@@ -11,8 +11,6 @@ export function App() {
         { id: 3, name: 'Игрок 3', points: 0, hasAnswered: false },
     ]);
 
-   
-    const [categories, setCategories] = useState([]);
     const [rounds, setRounds] = useState([]);
 
     useEffect(() => {
@@ -27,7 +25,42 @@ export function App() {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
+    const validateRounds = (rounds) => {
+        if (!Array.isArray(rounds)) return false;
+    
+        for (const round of rounds) {
+            if (typeof round !== 'object' || round === null) return false;
+            if (typeof round.id !== 'string' || round.id.trim() === '') return false;
+            if (typeof round.name !== 'string' || round.name.trim() === '') return false;
+            if (!Array.isArray(round.categories)) return false;
+    
+            for (const category of round.categories) {
+                if (typeof category !== 'object' || category === null) return false;
+                if (typeof category.id !== 'string' || category.id.trim() === '') return false;
+                if (typeof category.name !== 'string' || category.name.trim() === '') return false;
+                if (!Array.isArray(category.questions)) return false;
+    
+                for (const question of category.questions) {
+                    if (typeof question !== 'object' || question === null) return false;
+                    if (typeof question.id !== 'string' || question.id.trim() === '') return false;
+                    if (typeof question.questionType !== 'string' || question.questionType.trim() === '') return false;
+                    if (typeof question.text !== 'string' || question.text.trim() === '') return false;
+                    if (typeof question.answer !== 'string' || question.answer.trim() === '') return false;
+                }
+            }
+        }
+    
+        return true;
+    };
+
     const saveChanges = (newPlayers, newRounds) => {
+
+        if (!validateRounds(newRounds)) {
+            console.error('Ошибка: данные раундов некорректные. Отправка отменена.');
+            alert('Невозможно сохранить: проверьте все поля раундов, категорий и вопросов.');
+            return;
+        }
+
         setPlayersData(newPlayers);
         setRounds(newRounds);
     

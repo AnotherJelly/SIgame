@@ -217,7 +217,7 @@ body {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    width: 400px;
+    width: 800px;
     max-width: 80%;
     transform: translateY(-30px);
     transition: transform 0.5s ease;
@@ -326,10 +326,17 @@ body {
     background-color: #f9f9f9;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+.modal-content-block__question {
+    display: flex;
+    gap: 5px;
+    justify-content: space-around;
+    flex-direction: row;
+}
 .modal-content-question {
     display: flex;
     justify-content: space-between;
     margin: 5px 0;
+    width: 100%;
 }
 .modal-content-question span {
     font-weight: bold;
