@@ -39,46 +39,63 @@ function Category({ name, questions, onClick, answeredQuestions, questionText, r
     );
 }
 
-function Player({ player, onAwardPoints, onDeductPoints, isQuestionSelected, isShowAnswer, setisTimerPaused, answerTime }) {
+function Player({ 
+    player, onAwardPoints, onDeductPoints, isQuestionSelected, setIsTimerPaused, 
+    answerTime, specialQuestionType, handleSpecialLabelStart, bets, onBetChange, isEveryoneNull
+}) {
     const [isCanAnswer, setisCanAnswer] = useState(false);
 
     useEffect(() => {
         setisCanAnswer(false);
     }, [isQuestionSelected]);
 
+    const canBet = specialQuestionType === "bet" && (isEveryoneNull || player.points > 0);
+
     const handleCanAnswer = () => {
-        setisTimerPaused(true);
+        if (specialQuestionType === "cat" || specialQuestionType === "bet") {
+            handleSpecialLabelStart(player.id);
+        }
+        setIsTimerPaused(true);
         setisCanAnswer(true);
     };
     
     return (
         <div className="player">
-                {isQuestionSelected && !(player.hasAnswered) && isCanAnswer && (
-                    <>
-                        <div className="player-timer">
-                            <div className="player-timer__line" style={{
-                                animation: `slide-out ${answerTime}s linear forwards`
-                            }}></div>
-                        </div>
-                        <div className="block-icons">
-        
-                            <button className="button-icons" onClick={() => onAwardPoints(player.id)}>
-                                <i className="fas fa-check"></i>
-                            </button>
-                            
-                            <button className="button-icons" onClick={() => onDeductPoints(player.id)}>
-                                <i className="fas fa-times"></i>
-                            </button>
-        
-                        </div>
-                    </>
-                )}
-                {((isShowAnswer && player.hasAnswered) || (isCanAnswer && isQuestionSelected)) && (
-                    <textarea disabled={player.hasAnswered || isShowAnswer}></textarea>
-                )}
-                {isQuestionSelected && !isCanAnswer && (
-                    <button className="button-answer" onClick={handleCanAnswer}>Ответить</button>
-                )}
+            {specialQuestionType === 'bet' && player.points > 0 && (
+                <input
+                    type="number"
+                    min={0}
+                    max={player.points}
+                    value={bets[player.id] || ''}
+                    onChange={(e) => onBetChange(player.id, Number(e.target.value))}
+                />
+            )}
+            {isQuestionSelected && !(player.hasAnswered) && isCanAnswer && (
+                <>
+                    <div className="player-timer">
+                        <div className="player-timer__line" style={{
+                            animation: `slide-out ${answerTime}s linear forwards`
+                        }}></div>
+                    </div>
+                    <div className="block-icons">
+    
+                        <button className="button-icons" onClick={() => onAwardPoints(player.id)}>
+                            <i className="fas fa-check"></i>
+                        </button>
+                        
+                        <button className="button-icons" onClick={() => onDeductPoints(player.id)}>
+                            <i className="fas fa-times"></i>
+                        </button>
+    
+                    </div>
+                </>
+            )}
+            {/*((isShowAnswer && player.hasAnswered) || (isCanAnswer && isQuestionSelected)) && (
+                <textarea disabled={player.hasAnswered || isShowAnswer}></textarea>
+            )*/}
+            {isQuestionSelected && !isCanAnswer && !player.hasAnswered && (canBet || specialQuestionType !== "bet") && (
+                <button className="button-answer" onClick={handleCanAnswer}>Ответить</button>
+            )}
             <div className="player-block">{player.name}</div>
             <div className="player-block player-block__score">{player.points}</div>
         </div>
@@ -105,18 +122,30 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
     const [selectedQuestion, setSelectedQuestion] = useState(null);
     const [answeredQuestions, setAnsweredQuestions] = useState([]);
     const [isButtonBlinking, setIsButtonBlinking] = useState(null);
-    const [isQuestionSelected, setisQuestionSelected] = useState(null);
+    const [isQuestionSelected, setIsQuestionSelected] = useState(null);
 
-    const [isShowAnswer, setisShowAnswer] = useState(false);
-    const [isDisabledCloseBtn, setisDisabledCloseBtn] = useState(false);
+    const [isShowAnswer, setIsShowAnswer] = useState(false);
+    const [isShowTimer, setIsShowTimer] = useState(true);
+    const [isDisabledCloseBtn, setIsDisabledCloseBtn] = useState(false);
 
     const [activeRoundIndex, setActiveRoundIndex] = useState(0);
     const [roundIntroText, setRoundIntroText] = useState('Раунд 1');
     const [showRoundIntro, setShowRoundIntro] = useState(true);
 
-    const [isTimerPaused, setisTimerPaused] = useState(false);
+    const [isTimerPaused, setIsTimerPaused] = useState(false);
 
     const [specialLabel, setSpecialLabel] = useState(null);
+
+    const [bets, setBets] = useState({});
+    const isEveryoneNull = playersData.every(player => player.points <= 0);
+    const handleBetChange = (playerId, betValue) => {
+        setBets(prev => {
+            if (betValue > playersData.find(p => p.id === playerId).points) {
+                return prev;
+            }
+            return { ...prev, [playerId]: betValue };
+        });
+    };
 
     const nextRound = () => {
         setRoundIntroText(`Раунд ${activeRoundIndex + 2}`);
@@ -145,25 +174,56 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
     }, [answeredQuestions, activeRoundIndex, rounds]);
 
     const handleAward = (playerId) => {
-        if (selectedQuestion) {
-            onAwardPoints(playerId, selectedQuestion.value);
+        if (!selectedQuestion) return;
 
-            handleShowAnswer();
-            setisDisabledCloseBtn(true);
-            setisTimerPaused(false);
-            setTimeout(() => {
-                setisDisabledCloseBtn(false);
-                setisShowAnswer(false);
-                setAnsweredQuestions([...answeredQuestions, selectedQuestion.question.id]);
-                setSelectedQuestion(null);
-            }, 5000);
+        let value = selectedQuestion.value;
+        if (selectedQuestion.question.questionType === 'bet') {
+            const betValues = Object.values(bets);
+            const maxBet = betValues.length > 0 ? Math.max(...betValues) : 0;
+            value = maxBet > 0 ? maxBet : selectedQuestion.value;
+            setBets({});
         }
+
+        onAwardPoints(playerId, value);
+
+        handleShowAnswer();
+        setIsDisabledCloseBtn(true);
+        setIsTimerPaused(false);
+        setTimeout(() => {
+            setIsDisabledCloseBtn(false);
+            setIsShowAnswer(false);
+            setAnsweredQuestions(prev => [...prev, selectedQuestion.question.id]);
+            setSelectedQuestion(null);
+        }, 5000);
     };
 
     const handleDeduct = (playerId) => {
-        if (selectedQuestion) {
-            onDeductPoints(playerId, selectedQuestion.value);
-            setisTimerPaused(false);
+        if (!selectedQuestion) return;
+
+        const questionTypeBet = selectedQuestion.question.questionType === 'bet';
+        const questionTypeCat = selectedQuestion.question.questionType === 'cat';
+
+        let value = selectedQuestion.value;
+        if (questionTypeBet) {
+            const betValues = Object.values(bets);
+            const maxBet = betValues.length > 0 ? Math.max(...betValues) : 0;
+            value = maxBet > 0 ? maxBet : selectedQuestion.value;
+            setBets({});
+        }
+
+        onDeductPoints(playerId, value);
+        setIsTimerPaused(false);
+        if (questionTypeBet || questionTypeCat) {
+            handleShowAnswer();
+            setIsDisabledCloseBtn(true);
+
+            setTimeout(() => {
+                setIsDisabledCloseBtn(false);
+                setIsShowAnswer(false);
+                setAnsweredQuestions(prev => [...prev, selectedQuestion.question.id]);
+                setSelectedQuestion(null);
+                resetAnswers();
+            }, 5000);
         }
     };
 
@@ -171,29 +231,43 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
         setIsButtonBlinking(question);
         setTimeout(() => {
             setIsButtonBlinking(null);
-            setisQuestionSelected(true);
+            setIsQuestionSelected(true);
             if (!answeredQuestions.includes(question.id)) {
                 if (['cat', 'bet'].includes(question.questionType)) {
                     const label = question.questionType === 'cat' ? 'Кот в мешке' : 'Вопрос со ставкой';
                     setSpecialLabel({ label, value, question });
                 } else {
                     setSelectedQuestion({ value, question });
+                    setIsShowTimer(true);
                 }
             }
         }, 2000);
     };
   
     const handleAnswer = () => {
-        setAnsweredQuestions([...answeredQuestions, selectedQuestion.question.id]);
+        setAnsweredQuestions(prev => [...prev, selectedQuestion.question.id]);
         setSelectedQuestion(null);
         resetAnswers();
-        setisShowAnswer(false);
-        setisTimerPaused(false);
+        setIsShowAnswer(false);
+        setIsTimerPaused(false);
     };
 
     const handleShowAnswer = () => {
-        setisQuestionSelected(false);
-        setisShowAnswer(true);
+        setIsQuestionSelected(false);
+        setIsShowAnswer(true);
+    };
+
+    const handleSpecialLabelStart = (playerId) => {
+        if (specialLabel?.question.questionType === "cat" || specialLabel?.question.questionType === "bet" ) {
+            setSelectedQuestion({ value: specialLabel.value, question: specialLabel.question });
+            setSpecialLabel(null);
+            setIsShowTimer(false);
+            const updatedPlayers = playersData.map(player => ({
+                ...player,
+                hasAnswered: player.id !== playerId
+            }));
+            resetAnswers(updatedPlayers);
+        }
     };
 
     const renderRoundIntro = (text) => (
@@ -219,7 +293,7 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
 
     const renderSelectedQuestion = ({ question }) => (
         <>
-            {!isShowAnswer && (
+            {!isShowAnswer && isShowTimer && (
                 <Timer timer={settingsApp.timer} isTimerPaused={isTimerPaused} />
             )}
 
@@ -260,7 +334,6 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
             />
         )
     );
-
   
     return (
         <div className="category-grid">
@@ -285,8 +358,13 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
                         onDeductPoints={handleDeduct}
                         isQuestionSelected={isQuestionSelected}
                         isShowAnswer={isShowAnswer}
-                        setisTimerPaused={setisTimerPaused}
+                        setIsTimerPaused={setIsTimerPaused}
                         answerTime={settingsApp.answerTime}
+                        specialQuestionType={specialLabel?.question.questionType}
+                        handleSpecialLabelStart={handleSpecialLabelStart}
+                        bets={bets}
+                        onBetChange={handleBetChange}
+                        isEveryoneNull={isEveryoneNull}
                     />
                 ))}
             </div>

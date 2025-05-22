@@ -97,10 +97,14 @@ export function App() {
         );
     };
 
-    const handleResetAnswers = () => {
-        setPlayersData((prevPlayers) =>
-            prevPlayers.map((player) => ({ ...player, hasAnswered: false }))
-        );
+    const handleResetAnswers = (updatedPlayers) => {
+        if (updatedPlayers) {
+            setPlayersData(updatedPlayers);
+        } else {
+            setPlayersData(prev =>
+                prev.map(p => ({ ...p, hasAnswered: false }))
+            );
+        }
     };
     
     return (
@@ -120,6 +124,7 @@ export function App() {
 
             <CategoryGrid 
                 playersData={playersData}
+                setPlayersData={setPlayersData}
                 rounds={rounds}
                 onAwardPoints={handleAwardPoints}
                 onDeductPoints={handleDeductPoints}

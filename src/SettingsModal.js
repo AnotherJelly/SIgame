@@ -76,12 +76,12 @@ function SettingsCategoryElement ( {category, catIndex, removeCategory, handleCa
                                 handleCategoryChange(category.id, null, curQuestion.id, e.target.value, 'text')
                             }
                         />                        
-                        <select 
+                        <select
                             value={curQuestion.questionType}
                             onChange={(e) =>
                                 handleCategoryChange(category.id, null, curQuestion.id, e.target.value, 'questionType')
                             }>
-                            <option value="ordinary" selected>Стандартный</option>
+                            <option value="ordinary">Стандартный</option>
                             <option value="cat">Кот в мешке</option>
                             <option value="bet">Со ставкой</option>
                         </select>
