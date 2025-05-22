@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import SettingsModal from './SettingsModal';
 import CategoryGrid from './CategoryGrid';
@@ -53,7 +53,7 @@ export function App() {
         return true;
     };
 
-    const saveChanges = (newPlayers, newRounds) => {
+    const handleSaveSettings = (newPlayers, newRounds) => {
 
         if (!validateRounds(newRounds)) {
             console.error('Ошибка: данные раундов некорректные. Отправка отменена.');
@@ -117,7 +117,7 @@ export function App() {
             <SettingsModal
                 rounds={rounds}
                 playersData={playersData}
-                saveChanges={saveChanges}
+                handleSaveSettings={handleSaveSettings}
                 closeModal={closeModal}
                 isModalOpen={isModalOpen}
             />

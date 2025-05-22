@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 
 const settingsApp = {
     timer: 60,
@@ -6,18 +6,20 @@ const settingsApp = {
     answerTime: 15
 };
 
-function Button({ value, question, onClick, isButtonBlinking }) {
-  
+const Button = React.memo(function Button({ value, question, onClick, isButtonBlinking }) {
     return (
         <div className="button-block">
-            <button className={`button-table ${isButtonBlinking ? "blinking-button" : ""}`} onClick={() => {onClick(value, question)}}>
+            <button
+                className={`button-table ${isButtonBlinking ? "blinking-button" : ""}`}
+                onClick={() => onClick(value, question)}
+            >
                 {value}
             </button>
         </div>
     );
-}
+});
 
-function Category({ name, questions, onClick, answeredQuestions, questionText, roundIndex }) {
+const Category = React.memo(function Category({ name, questions, onClick, answeredQuestions, questionText, roundIndex }) {
     return (
         <>
             <div className="category-title">{name}</div>
@@ -37,16 +39,16 @@ function Category({ name, questions, onClick, answeredQuestions, questionText, r
             })}
         </>
     );
-}
+});
 
-function Player({ 
+const Player = React.memo(function Player({ 
     player, onAwardPoints, onDeductPoints, isQuestionSelected, setIsTimerPaused, 
     answerTime, specialQuestionType, handleSpecialLabelStart, bets, onBetChange, isEveryoneNull
 }) {
-    const [isCanAnswer, setisCanAnswer] = useState(false);
+    const [isCanAnswer, setIsCanAnswer] = useState(false);
 
     useEffect(() => {
-        setisCanAnswer(false);
+        setIsCanAnswer(false);
     }, [isQuestionSelected]);
 
     const canBet = specialQuestionType === "bet" && (isEveryoneNull || player.points > 0);
@@ -56,7 +58,7 @@ function Player({
             handleSpecialLabelStart(player.id);
         }
         setIsTimerPaused(true);
-        setisCanAnswer(true);
+        setIsCanAnswer(true);
     };
     
     return (
@@ -100,7 +102,26 @@ function Player({
             <div className="player-block player-block__score">{player.points}</div>
         </div>
     );
-}
+},
+    function areEqual(prev, next) {
+        if (prev.player !== next.player) {
+            return false;
+        }
+        if (prev.player.points !== next.player.points) {
+            return false;
+        }
+        if (prev.isQuestionSelected !== next.isQuestionSelected || prev.isShowAnswer !== next.isShowAnswer) {
+            return false;
+        }
+        if ((prev.bets[prev.player.id] || 0) !== (next.bets[next.player.id] || 0)) {
+            return false;
+        }
+        if (prev.specialQuestionType !== next.specialQuestionType) {
+            return false;
+        }
+
+        return true;
+});
 
 function Timer({timer, isTimerPaused}) {
     const [time, setTime] = useState(timer);
@@ -117,7 +138,19 @@ function Timer({timer, isTimerPaused}) {
     return <div className="timer">{time}</div>;
 }
 
-export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDeductPoints, resetAnswers }) {
+function useRoundIntro(activeRoundIndex, pause) {
+    const [showIntro, setShowIntro] = useState(true);
+
+    useEffect(() => {
+        setShowIntro(true);
+        const t = setTimeout(() => setShowIntro(false), pause);
+        return () => clearTimeout(t);
+    }, [activeRoundIndex, pause]);
+
+    return showIntro;
+}
+
+export default function CategoryGrid({ playersData, rounds, onAwardPoints, onDeductPoints, resetAnswers }) {
   
     const [selectedQuestion, setSelectedQuestion] = useState(null);
     const [answeredQuestions, setAnsweredQuestions] = useState([]);
@@ -130,50 +163,47 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
 
     const [activeRoundIndex, setActiveRoundIndex] = useState(0);
     const [roundIntroText, setRoundIntroText] = useState('Раунд 1');
-    const [showRoundIntro, setShowRoundIntro] = useState(true);
+    const showRoundIntro = useRoundIntro(activeRoundIndex, settingsApp.roundIntroPause);
 
     const [isTimerPaused, setIsTimerPaused] = useState(false);
 
     const [specialLabel, setSpecialLabel] = useState(null);
 
     const [bets, setBets] = useState({});
-    const isEveryoneNull = playersData.every(player => player.points <= 0);
-    const handleBetChange = (playerId, betValue) => {
+    const isEveryoneNull = useMemo(
+        () => playersData.every(p => p.points <= 0),
+        [playersData]
+    );
+    const handleBetChange = useCallback((playerId, betValue) => {
         setBets(prev => {
-            if (betValue > playersData.find(p => p.id === playerId).points) {
-                return prev;
-            }
+            const max = playersData.find(p => p.id === playerId).points;
+            if (betValue > max) return prev;
             return { ...prev, [playerId]: betValue };
         });
-    };
+    }, [playersData, setBets]);
 
-    const nextRound = () => {
+
+    const nextRound = useCallback(() => {
         setRoundIntroText(`Раунд ${activeRoundIndex + 2}`);
-        setShowRoundIntro(true);
-        setTimeout(() => {
-            setActiveRoundIndex(prev => prev + 1);
-            setShowRoundIntro(false);
-        }, settingsApp.roundIntroPause);
-    };
+        setActiveRoundIndex(idx => idx + 1);
+    }, [activeRoundIndex, setRoundIntroText, setActiveRoundIndex]);
+
+    const currentRoundQuestions = useMemo(
+        () => rounds[activeRoundIndex]?.categories.flatMap(cat => cat.questions) || [],
+        [rounds, activeRoundIndex]
+    );
 
     useEffect(() => {
-        const timer = setTimeout(() => setShowRoundIntro(false), settingsApp.roundIntroPause);
-        return () => clearTimeout(timer);
-    }, []);
-
-    useEffect(() => {
-        const allQuestions = rounds[activeRoundIndex]?.categories.flatMap(cat => cat.questions) || [];
-        const allAnswered = allQuestions.every(q => answeredQuestions.includes(q.id));
+        const allAnswered = currentRoundQuestions.every(q => answeredQuestions.includes(q.id));
     
         if (allAnswered && activeRoundIndex < rounds.length - 1) {
             nextRound();
         } else if (allAnswered && activeRoundIndex == rounds.length - 1) {
             setRoundIntroText(`Конец игры`);
-            setShowRoundIntro(true);
         }
-    }, [answeredQuestions, activeRoundIndex, rounds]);
+    }, [currentRoundQuestions, answeredQuestions, activeRoundIndex, rounds, nextRound, setRoundIntroText]);
 
-    const handleAward = (playerId) => {
+    const handleAward = useCallback((playerId) => {
         if (!selectedQuestion) return;
 
         let value = selectedQuestion.value;
@@ -195,9 +225,9 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
             setAnsweredQuestions(prev => [...prev, selectedQuestion.question.id]);
             setSelectedQuestion(null);
         }, 5000);
-    };
+    }, [selectedQuestion, bets, onAwardPoints, setBets]);
 
-    const handleDeduct = (playerId) => {
+    const handleDeduct = useCallback((playerId) => {
         if (!selectedQuestion) return;
 
         const questionTypeBet = selectedQuestion.question.questionType === 'bet';
@@ -225,9 +255,9 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
                 resetAnswers();
             }, 5000);
         }
-    };
+     }, [selectedQuestion, bets, onDeductPoints, setBets]);
 
-    const handleButtonClick = (value, question) => {
+    const handleButtonClick = useCallback((value, question) => {
         setIsButtonBlinking(question);
         setTimeout(() => {
             setIsButtonBlinking(null);
@@ -242,22 +272,23 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
                 }
             }
         }, 2000);
-    };
+    }, [answeredQuestions, setIsButtonBlinking, setIsQuestionSelected, setSelectedQuestion, setIsShowTimer]);
   
-    const handleAnswer = () => {
+    const handleAnswer = useCallback(() => {
+        if (!selectedQuestion) return;
         setAnsweredQuestions(prev => [...prev, selectedQuestion.question.id]);
         setSelectedQuestion(null);
         resetAnswers();
         setIsShowAnswer(false);
         setIsTimerPaused(false);
-    };
+    }, [selectedQuestion, resetAnswers, setIsShowAnswer, setIsTimerPaused]);
 
-    const handleShowAnswer = () => {
+    const handleShowAnswer = useCallback(() => {
         setIsQuestionSelected(false);
         setIsShowAnswer(true);
-    };
+    }, [setIsQuestionSelected, setIsShowAnswer]);
 
-    const handleSpecialLabelStart = (playerId) => {
+    const handleSpecialLabelStart = useCallback((playerId) => {
         if (specialLabel?.question.questionType === "cat" || specialLabel?.question.questionType === "bet" ) {
             setSelectedQuestion({ value: specialLabel.value, question: specialLabel.question });
             setSpecialLabel(null);
@@ -268,15 +299,13 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
             }));
             resetAnswers(updatedPlayers);
         }
-    };
+    }, [specialLabel, setSelectedQuestion, setSpecialLabel, setIsShowTimer]);
 
-    const renderRoundIntro = (text) => (
-        <div className="question">
-            <p>{text}</p>
-        </div>
-    );
+    const renderRoundIntro = useCallback(text => (
+        <div className="question"><p>{text}</p></div>
+    ), []);
 
-    const renderSpecialLabel = (label) => (
+    const renderSpecialLabel = useCallback((label) => (
         <div className="question">
             <p className="special-label">{label.label}</p>
             <button
@@ -289,9 +318,9 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
                 Показать вопрос
             </button>
         </div>
-    );
+    ), [isShowAnswer, isShowTimer, isDisabledCloseBtn, handleShowAnswer, handleAnswer]);
 
-    const renderSelectedQuestion = ({ question }) => (
+    const renderSelectedQuestion = useCallback(({ question }) => (
         <>
             {!isShowAnswer && isShowTimer && (
                 <Timer timer={settingsApp.timer} isTimerPaused={isTimerPaused} />
@@ -319,10 +348,15 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
             )}
             </div>
         </>
+    ), [isShowAnswer, isShowTimer, isDisabledCloseBtn, handleShowAnswer, handleAnswer]);
+
+    const categories = useMemo(
+        () => rounds[activeRoundIndex]?.categories || [],
+        [rounds, activeRoundIndex]
     );
 
-    const renderCategories = () =>
-        rounds[activeRoundIndex]?.categories.map((category) => (
+    const renderCategories = useCallback(() => (
+        categories.map((category) => (
             <Category
                 key={category.id}
                 name={category.name}
@@ -332,22 +366,18 @@ export default  function CategoryGrid({ playersData, rounds, onAwardPoints, onDe
                 questionText={isButtonBlinking}
                 roundIndex={activeRoundIndex}
             />
-        )
-    );
+        ))
+    ), [categories, handleButtonClick, answeredQuestions, isButtonBlinking, activeRoundIndex]);
   
+    let mainArea;
+    if (showRoundIntro) mainArea = renderRoundIntro(roundIntroText);
+    else if (specialLabel) mainArea = renderSpecialLabel(specialLabel);
+    else if (selectedQuestion) mainArea = renderSelectedQuestion(selectedQuestion);
+    else mainArea = renderCategories();
+
     return (
         <div className="category-grid">
-            <div className="desk-grid">
-                {showRoundIntro ? (
-                    renderRoundIntro(roundIntroText)
-                ) : specialLabel ? (
-                    renderSpecialLabel(specialLabel)
-                ) : selectedQuestion ? (
-                    renderSelectedQuestion(selectedQuestion)
-                ) : (
-                    renderCategories()
-                )}
-            </div>
+            <div className="desk-grid">{mainArea}</div>
 
             <div className="players">
                 {playersData.map((player) => (

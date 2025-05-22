@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 
 const settings = {
     maxPlayers: 6,
@@ -102,48 +102,38 @@ function SettingsCategoryElement ( {category, catIndex, removeCategory, handleCa
     );
 }
 
-function SettingsPlayersBlock ( {playersData, newPlayers, setNewPlayers} ) {
+const SettingsPlayersBlock = React.memo(function SettingsPlayersBlock ( {playersData, newPlayers, setNewPlayers} ) {
 
     useEffect(() => {
         setNewPlayers(playersData);
     }, [playersData]);
 
-    const handlePlayerChange = (id, value, type) => {
-        const updatedPlayers = [...newPlayers];
+    const handlePlayerChange = useCallback((id, value, type) => {
+        setNewPlayers(prevPlayers => {
+            return prevPlayers.map(player => {
+                if (player.id !== id) return player;
+                if (type === 'name') {
+                    return { ...player, name: value };
+                } else if (type === 'points') {
+                    const parsed = value === '' || value === '-' ? value : parseInt(value, 10);
+                    const newPoints = isNaN(parsed) ? value : parsed;
+                    return { ...player, points: newPoints };
+                }
+                return player;
+            });
+        });
+    }, [setNewPlayers]);
 
-        const playerIndex = updatedPlayers.findIndex(player => player.id === id);
-        if (playerIndex === -1) {
-            console.warn(`Игрок с id: ${id} не найден`);
-            return;
-        }
+    const addPlayer = useCallback(() => {
+        setNewPlayers(prev => [
+            ...prev,
+            { id: generateId(), name: `Игрок ${prev.length + 1}`, points: 0, hasAnswered: false }
+        ]);
+    }, [setNewPlayers]);
 
-        switch (type) {
-            case 'name':
-                updatedPlayers[playerIndex].name = value;
-                break;
-            case 'points':
-                const parsedValue = value === '' || value === '-' ? value : parseInt(value, 10);
-                updatedPlayers[playerIndex].points = isNaN(parsedValue) ? value : parsedValue;
-                break;
-            default:
-                console.warn(`Неизвестный тип: ${type}`);
-        }
-
-        setNewPlayers(updatedPlayers);
-    };
-
-    const addPlayer = () => {
-        if (newPlayers.length < settings.maxPlayers) {
-            setNewPlayers([
-                ...newPlayers,
-                { id: generateId(), name: `Игрок ${newPlayers.length + 1}`, points: 0, hasAnswered: false },
-            ]);
-        }
-    };
-
-    const removePlayer = (id) => {
-        setNewPlayers(newPlayers.filter((player) => player.id !== id));
-    };
+    const removePlayer = useCallback(id => {
+        setNewPlayers(prev => prev.filter(p => p.id !== id));
+    }, [setNewPlayers]);
 
     return (
         <div className="modal-content__players">
@@ -175,100 +165,68 @@ function SettingsPlayersBlock ( {playersData, newPlayers, setNewPlayers} ) {
             </button>
         </div>
     );
-}
+});
 
-function SettingsCategoryBlock ( { id, roundIndex, categories, setNewCategories, removeRound } ) {
+const SettingsCategoryBlock = React.memo(function SettingsCategoryBlock ( { id, roundIndex, categories, setNewCategories, removeRound } ) {
 
     const [isCollapsed, setIsCollapsed] = useState(false);
-
-    const toggleCollapse = () => {
-        setIsCollapsed(!isCollapsed);
-    };
     
     useEffect(() => {
         setNewCategories(categories, roundIndex);
     }, [categories]);
 
-    const removeCategory = (id) => {
-        setNewCategories(categories.filter((category) => category.id !== id), roundIndex);
-    };
+    const toggleCollapse = useCallback(() => {
+        setIsCollapsed(prev => !prev);
+    }, []);
 
-    const addCategory = () => {
-        const newCategory = {
+    const removeCategory = useCallback((catId) => {
+        setNewCategories(
+            categories.filter(cat => cat.id !== catId),
+            roundIndex
+        );
+    }, [categories, roundIndex, setNewCategories]);
+
+    const addCategory = useCallback(() => {
+        if (categories.length >= settings.maxCategories) return;
+
+        const base = categories.length;
+        const newQs = Array.from({ length: 5 }, (_, i) => ({
             id: generateId(),
-            name: `Category ${categories.length + 1}`,
-            questions: [
-                {
-                    id: generateId(),
-                    questionType: "ordinary",
-                    text: `Question ${categories.length * 5 + 1}`,
-                    answer: `Answer ${categories.length * 5 + 1}`
-                },
-                {
-                    id: generateId(),
-                    questionType: "ordinary",
-                    text: `Question ${categories.length * 5 + 2}`,
-                    answer: `Answer ${categories.length * 5 + 2}`
-                },
-                {
-                    id: generateId(),
-                    questionType: "ordinary",
-                    text: `Question ${categories.length * 5 + 3}`,
-                    answer: `Answer ${categories.length * 5 + 3}`
-                },
-                {
-                    id: generateId(),
-                    questionType: "ordinary",
-                    text: `Question ${categories.length * 5 + 4}`,
-                    answer: `Answer ${categories.length * 5 + 4}`
-                },
-                {
-                    id: generateId(),
-                    questionType: "ordinary",
-                    text: `Question ${categories.length * 5 + 5}`,
-                    answer: `Answer ${categories.length * 5 + 5}`
-                }
-            ]
+            questionType: "ordinary",
+            text:    ``,
+            answer:  ``
+        }));
+        const newCat  = {
+            id: generateId(),
+            name: ``,
+            questions: newQs
         };
-    
-        setNewCategories([
-            ...categories,
-            newCategory,
-        ], roundIndex);
-    };
 
-    const handleCategoryChange = (catId, categoryName, questionId, value, field) => {
-        const updatedCategories = [...categories];
+        setNewCategories(
+            [...categories, newCat],
+            roundIndex
+        );
+    }, [categories, roundIndex, setNewCategories]);
 
-        const categoryIndex = updatedCategories.findIndex(category => category.id === catId);
-        if (categoryIndex === -1) {
-            console.warn(`Категория с id: ${catId} не найдена`);
-            return;
-        }
+    const handleCategoryChange = useCallback((catId, categoryName, questionId, value, field) => {
+        const updated = categories.map(cat => {
+            if (cat.id !== catId) return cat;
 
-        if (categoryName !== undefined && categoryName !== null) updatedCategories[categoryIndex].name = categoryName;
-        if (questionId !== undefined) {
-            const questionIndex = updatedCategories[categoryIndex].questions.findIndex(question => question.id === questionId);
-            if (questionIndex === -1) {
-                console.warn(`Вопрос с id: ${questionId} не найден`);
-                return;
+            const copyCat = { ...cat };
+            if (categoryName != null) {
+                copyCat.name = categoryName;
             }
-            switch (field) {
-                case 'text':
-                    updatedCategories[categoryIndex].questions[questionIndex].text = value;
-                    break;
-                case 'answer':
-                    updatedCategories[categoryIndex].questions[questionIndex].answer = value;
-                    break;
-                case 'questionType':
-                    updatedCategories[categoryIndex].questions[questionIndex].questionType = value;
-                    break;
-                default:
-                    console.warn(`Неизвестное поле: ${field}`);
+            if (questionId != null) {
+                copyCat.questions = copyCat.questions.map(q => 
+                q.id !== questionId 
+                    ? q 
+                    : { ...q, [field]: value }
+                );
             }
-        }
-        setNewCategories(updatedCategories, roundIndex);
-    };
+            return copyCat;
+        });
+        setNewCategories(updated, roundIndex);
+    }, [categories, roundIndex, setNewCategories]);
 
     return (
         <div className="modal-content__players">
@@ -296,76 +254,49 @@ function SettingsCategoryBlock ( { id, roundIndex, categories, setNewCategories,
             )}
         </div>
     );
-}
+});
 
-function SettingsRoundBlock ( { rounds, newRounds, setNewRounds } ) {
+const SettingsRoundBlock = React.memo(function SettingsRoundBlock({ newRounds, setNewRounds }) {
+    const removeRound = useCallback((id) => {
+        setNewRounds(prev =>
+            prev.filter(r => r.id !== id)
+        );
+    }, [setNewRounds]);
 
-    useEffect(() => {
-        setNewRounds(rounds);
-    }, [rounds]);
-
-    const removeRound = (id) => {
-        setNewRounds(newRounds.filter((round) => round.id !== id));
-    };
-
-    const addRound = () => {
-        const newRound = {
-            id: generateId(),
-            name: `Round ${newRounds.length + 1}`,
-            categories: [
-                {
-                    id: generateId(),
-                    name: `Category`,
-                    questions: [
-                        {
+    const addRound = useCallback(() => {
+        setNewRounds(prev => {
+            if (prev.length >= settings.maxRounds) return prev;
+            const index = prev.length;
+            const newRound = {
+                id: generateId(),
+                name: `Round ${index + 1}`,
+                categories: [
+                    {
+                        id: generateId(),
+                        name: ``,
+                        questions: Array.from({ length: 5 }, () => ({
                             id: generateId(),
                             questionType: "ordinary",
-                            text: `Question`,
-                            answer: `Answer`
-                        },
-                        {
-                            id: generateId(),
-                            questionType: "ordinary",
-                            text: `Question`,
-                            answer: `Answer`
-                        },
-                        {
-                            id: generateId(),
-                            questionType: "ordinary",
-                            text: `Question`,
-                            answer: `Answer`
-                        },
-                        {
-                            id: generateId(),
-                            questionType: "ordinary",
-                            text: `Question`,
-                            answer: `Answer`
-                        },
-                        {
-                            id: generateId(),
-                            questionType: "ordinary",
-                            text: `Question`,
-                            answer: `Answer`
-                        }
-                    ]
-                }
-            ]
-        };
-    
-        setNewRounds([
-            ...newRounds,
-            newRound,
-        ]);
-    };
+                            text: "",
+                            answer: ""
+                        }))
+                    }
+                ]
+            };
+            return [...prev, newRound];
+        });
+    }, [setNewRounds]);
 
-    const setNewCategories = (updatedCategories, roundIndex) => {
-        const updatedRounds = [...newRounds];
-        updatedRounds[roundIndex] = {
-            ...updatedRounds[roundIndex],
-            categories: updatedCategories,
-        };
-        setNewRounds(updatedRounds);
-    }
+    const setNewCategories = useCallback((updatedCategories, roundIndex) => {
+        setNewRounds(prev => {
+            const updatedRounds = [...prev];
+            updatedRounds[roundIndex] = {
+                ...updatedRounds[roundIndex],
+                categories: updatedCategories
+            };
+            return updatedRounds;
+        });
+    }, [setNewRounds]);
 
     return (
         <div className="modal-content__players">
@@ -379,15 +310,28 @@ function SettingsRoundBlock ( { rounds, newRounds, setNewRounds } ) {
                     removeRound={removeRound}
                 />
             ))}
-            <button onClick={addRound} className="modal-content__btn--add modal-content__btn--wide" disabled={newRounds.length >= settings.maxRounds}>Добавить раунд</button>
+            <button
+                onClick={addRound}
+                className="modal-content__btn--add modal-content__btn--wide"
+                disabled={newRounds.length >= settings.maxRounds}
+            >
+                Добавить раунд
+            </button>
         </div>
     );
-}
+});
 
-export default function SettingsModal ({ rounds, playersData, saveChanges, closeModal, isModalOpen }) {
+export default function SettingsModal ({ rounds, playersData, handleSaveSettings, closeModal, isModalOpen }) {
 
     const [newRounds, setNewRounds] = useState(rounds);
     const [newPlayers, setNewPlayers] = useState(playersData);
+    
+    useEffect(() => {
+        if (isModalOpen) {
+            setNewRounds(rounds);
+            setNewPlayers(playersData);
+        }
+    }, [isModalOpen]);
 
     return (
         <div className={`modal-overlay ${isModalOpen ? "open" : ""}`}>
@@ -413,7 +357,7 @@ export default function SettingsModal ({ rounds, playersData, saveChanges, close
                     />
                 </div>
 
-                <button className="modal-content__btn--save" onClick={() => saveChanges(newPlayers, newRounds)}>Сохранить изменения</button>
+                <button className="modal-content__btn--save" onClick={() => handleSaveSettings(newPlayers, newRounds)}>Сохранить изменения</button>
                 
             </div>
         </div>
