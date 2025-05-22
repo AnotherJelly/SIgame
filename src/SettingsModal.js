@@ -319,31 +319,31 @@ function SettingsRoundBlock ( { rounds, newRounds, setNewRounds } ) {
                     questions: [
                         {
                             id: generateId(),
-                            questionType: "test",
+                            questionType: "ordinary",
                             text: `Question`,
                             answer: `Answer`
                         },
                         {
                             id: generateId(),
-                            questionType: "test",
+                            questionType: "ordinary",
                             text: `Question`,
                             answer: `Answer`
                         },
                         {
                             id: generateId(),
-                            questionType: "test",
+                            questionType: "ordinary",
                             text: `Question`,
                             answer: `Answer`
                         },
                         {
                             id: generateId(),
-                            questionType: "test",
+                            questionType: "ordinary",
                             text: `Question`,
                             answer: `Answer`
                         },
                         {
                             id: generateId(),
-                            questionType: "test",
+                            questionType: "ordinary",
                             text: `Question`,
                             answer: `Answer`
                         }
