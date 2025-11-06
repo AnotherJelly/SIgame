@@ -18570,7 +18570,13 @@ function App() {
                         lineNumber: 78,
                         columnNumber: 17
                     }, this),
-                    " \u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
+                        children: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438"
+                    }, void 0, false, {
+                        fileName: "src/pages/App.jsx",
+                        lineNumber: 79,
+                        columnNumber: 17
+                    }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/pages/App.jsx",
@@ -18585,7 +18591,7 @@ function App() {
                 isModalOpen: isModalOpen
             }, void 0, false, {
                 fileName: "src/pages/App.jsx",
-                lineNumber: 81,
+                lineNumber: 82,
                 columnNumber: 13
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _categoryGridDefault.default), {
@@ -18596,7 +18602,7 @@ function App() {
                 resetAnswers: handleResetAnswers
             }, void 0, false, {
                 fileName: "src/pages/App.jsx",
-                lineNumber: 89,
+                lineNumber: 90,
                 columnNumber: 13
             }, this)
         ]
@@ -20497,7 +20503,7 @@ function validatePlayers(players) {
     if (!Array.isArray(players)) return false;
     for (const player of players){
         if (typeof player !== 'object' || player === null) return false;
-        if (typeof player.id !== 'number' || !Number.isFinite(player.id)) return false;
+        if (typeof player.id !== 'string' || player.id.trim() === '') return false;
         if (typeof player.name !== 'string' || player.name.trim() === '') return false;
         if (typeof player.points !== 'number' || !Number.isFinite(player.points)) return false;
         if (typeof player.hasAnswered !== 'boolean') return false;
@@ -20532,19 +20538,19 @@ parcelHelpers.export(exports, "initialPlayers", ()=>initialPlayers);
 parcelHelpers.export(exports, "playersReducer", ()=>playersReducer);
 const initialPlayers = [
     {
-        id: 1,
+        id: '1',
         name: "\u0418\u0433\u0440\u043E\u043A 1",
         points: 0,
         hasAnswered: false
     },
     {
-        id: 2,
+        id: '2',
         name: "\u0418\u0433\u0440\u043E\u043A 2",
         points: 0,
         hasAnswered: false
     },
     {
-        id: 3,
+        id: '3',
         name: "\u0418\u0433\u0440\u043E\u043A 3",
         points: 0,
         hasAnswered: false
