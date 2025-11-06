@@ -75,7 +75,8 @@ export function App() {
         <div className="App">
 
             <button className="button-setting" onClick={openModal}>
-                <i className="fas fa-cogs"></i> Настройки
+                <i className="fas fa-cogs"></i>
+                <span>Настройки</span>
             </button>
 
             <SettingsModal

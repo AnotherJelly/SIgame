@@ -5,38 +5,18 @@ body {
     margin: 0;
 }
 
-.button-table {
-    width: 100%;
-    cursor: pointer;
-    height: 100%;
-    margin: 0;
-    border: none;
-    background-color: inherit;
-    color: #3CFF00;
-    font-size: 28px;
-    padding: 20px;
-    transition: .3s;
-}
-
-.button-table:hover {
-    background-color: #050098;
-}
-
-.button-block {
-    border: 1px solid white;
-}
-
 .players {
     display: flex;
     justify-content: space-around;
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 1em;
+    flex-wrap: wrap;
+    font-size: 20px;
 }
-
 .player {
     flex: 1;
     text-align: center;
-    margin: 20px;
+    margin: 1em;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -46,8 +26,7 @@ body {
 .player-block {
     background: black;
     color: white;
-    font-size: 22px;
-    padding: 5px 20px;
+    padding: .4em 1em;
     font-weight: 700;
 }
 .player-block__score {
@@ -57,8 +36,8 @@ body {
     background: #900000;
     border: none;
     border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 16px;
+    padding: .3em .7em;
+    font-size: .8em;
     cursor: pointer;
     color: white;
     transition: .3s;
@@ -68,7 +47,7 @@ body {
 }
 .player-timer {
     width: 100%;
-    height: 5px;
+    height: .3em;
     background: white;
     border-radius: 5px;
     position: relative;
@@ -92,13 +71,13 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: .5em;
 }
 .button-icons {
     border: none;
     border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 16px;
+    padding: .3em .7em;
+    font-size: .8em;
     cursor: pointer;
     color: white;
     transition: .3s;
@@ -115,21 +94,20 @@ body {
 
 .question {
     text-align: center;
-    font-size: 18px;
-    margin: 20px;
+    margin: .7em;
     animation: slideInFromBack 0.5s ease-out forwards;
     opacity: 0;
 }
 .question p {
     color: white;
-    font-size: 54px;
+    font-size: 2em;
 }
 .question .button {
     background: #900000;
     border: none;
     border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 16px;
+    padding: .3em .7em;
+    font-size: .6em;
     cursor: pointer;
     color: white;
     transition: .3s;
@@ -151,6 +129,16 @@ body {
       opacity: 1;
     }
 }
+@media (max-width:768px) {
+    .question p {
+        font-size: 1.5em;
+    }
+}
+@media (max-width:440px) {
+    .question .button {
+        font-size: 1rem;
+    }
+}
 
 .category-grid {
     display: flex;
@@ -166,7 +154,6 @@ body {
         url('data:image/svg+xml,%3Csvg width="201" height="178" viewBox="0 0 201 178" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M130.703 0.507489L200.905 73.7829L170.78 162.297L70.4543 177.536L0.252615 104.26L30.3771 15.7463L130.703 0.507489Z" fill="%23000451" fill-opacity="0.2"/%3E%3C/svg%3E'),
         url('data:image/svg+xml,%3Csvg width="201" height="178" viewBox="0 0 201 178" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M130.703 0.507489L200.905 73.7829L170.78 162.297L70.4543 177.536L0.252615 104.26L30.3771 15.7463L130.703 0.507489Z" fill="%23000451" fill-opacity="0.2"/%3E%3C/svg%3E');
 }
-
 .category {
     display: flex;
     flex-direction: row;
@@ -176,9 +163,10 @@ body {
     display: grid;
     grid-template-columns: 4fr repeat(5, 1fr);
     background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(0, 4, 81, 1) 80%);
-    border: 20px solid black;
-    margin: 20px;
+    border: .7em solid black;
+    margin: .7em;
     max-width: 70%;
+    font-size: 28px;
 }
 .desk-grid:has(.question) {
     grid-template-columns: auto;
@@ -189,11 +177,60 @@ body {
     color: white;
     font-weight: 700;
     text-transform: uppercase;
-    padding: 20px 50px;
+    padding: .5em 1.5em;
     justify-content: center;
-    font-size: 28px;
+    font-size: 1em;
     border: 1px solid white;
     text-align: center;
+}
+.button-table {
+    width: 100%;
+    cursor: pointer;
+    height: 100%;
+    margin: 0;
+    border: none;
+    background-color: inherit;
+    color: #3CFF00;
+    font-size: 1em;
+    transition: .3s;
+}
+.button-table:hover {
+    background-color: #050098;
+}
+.button-block {
+    border: 1px solid white;
+}
+@media (max-width:1280px) {
+    .desk-grid {
+        font-size: 24px;
+        max-width: 90%;
+    }
+}
+@media (max-width:768px) {
+    .desk-grid {
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+    .category-title {
+        flex-basis: 100%;
+    }
+    .button-block {
+        flex-basis: 20%;
+    }
+    .button-table {
+        padding: .2em;
+    }
+}
+@media (max-width:440px) {
+    .button-block {
+        flex-basis: 33%;
+    }
+}
+@media (max-width:300px) {
+    .desk-grid {
+        font-size: 16px;
+    }
 }
 
 .modal-overlay {
@@ -414,6 +451,12 @@ body {
     width: 100%;
     height: 100%;
 }
+@media (max-width:768px) {
+    .modal-content {
+        max-width: 100%;
+        max-height: 100%;
+    }
+}
 
 @keyframes slideInFromBack {
     0% {
@@ -446,7 +489,7 @@ body {
     background-color: #4CAF50;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: .7em 1.3em;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -458,19 +501,25 @@ body {
     transform: translate(10px, 10px);
     z-index: 1;
 }
-
 .button-setting:hover {
     background-color: #45a049;
     transform: scale(1.1) translate(10px, 10px);
 }
-
 .button-setting:active {
     background-color: #387940;
 }
-
-.button-setting .icon {
-    margin-right: 8px;
-    font-size: 18px;
+.button-setting span {
+    margin-left: .5em;
+}
+@media (max-width:768px) {
+    .button-setting span {
+        display: none;
+    }
+}
+@media (max-width:440px) {
+    .button-setting {
+        font-size: 12px;
+    }
 }
 
 .timer {
@@ -485,6 +534,14 @@ body {
     font-size: 24px;
     width: 2em;
     text-align: center;
+}
+@media (max-width:768px) {
+    .timer {
+        font-size: 20px;
+        border: 1px solid #fff;
+        top: 0;
+        transform: translate(-15%, 15%);
+    }
 }
 
 .modal-content__collapse {

@@ -32,7 +32,7 @@ export function validatePlayers (players) {
     for (const player of players) {
       if (typeof player !== 'object' || player === null) return false;
 
-      if (typeof player.id !== 'number' || !Number.isFinite(player.id)) return false;
+      if (typeof player.id !== 'string' || player.id.trim() === '') return false;
       if (typeof player.name !== 'string' || player.name.trim() === '') return false;
       if (typeof player.points !== 'number' || !Number.isFinite(player.points)) return false;
       if (typeof player.hasAnswered !== 'boolean') return false;

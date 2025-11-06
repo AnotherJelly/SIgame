@@ -1,7 +1,7 @@
 export const initialPlayers = [
-  { id: 1, name: 'Игрок 1', points: 0, hasAnswered: false },
-  { id: 2, name: 'Игрок 2', points: 0, hasAnswered: false },
-  { id: 3, name: 'Игрок 3', points: 0, hasAnswered: false },
+  { id: '1', name: 'Игрок 1', points: 0, hasAnswered: false },
+  { id: '2', name: 'Игрок 2', points: 0, hasAnswered: false },
+  { id: '3', name: 'Игрок 3', points: 0, hasAnswered: false },
 ];
 
 export function playersReducer(state, action) {
