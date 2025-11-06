@@ -263,6 +263,7 @@ body {
 @media (width <= 440px) {
   .button-block {
     flex-basis: 33.33%;
+    min-height: 1.5em;
   }
 }
 
