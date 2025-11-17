@@ -1,13 +1,14 @@
 import React from "react";
-import { Button } from "./Button";
+import { Button } from "../Button/Button";
+import style from './Category.module.css'
 
 export const Category = React.memo(function Category({ name, questions, onClick, answeredQuestions, questionText, roundIndex }) {
     return (
         <>
-            <div className="category-title">{name}</div>
+            <div className={style.categoryTitle}>{name}</div>
             {questions.map((question, index) => {
                 if (answeredQuestions.includes(question.id)) {
-                    return <div key={question.id} className="button-block"></div>;
+                    return <div key={question.id} className={style.buttonBlock}></div>;
                 }
                 return (
                     <Button

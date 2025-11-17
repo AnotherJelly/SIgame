@@ -1,0 +1,52 @@
+.categoryGrid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #5E36D8;
+    width: 100%;
+    min-height: 100vh;
+    justify-content: space-between;
+    background-repeat: repeat;
+    background-position: 0 0, 40px 0px;
+    background-image:
+        url('data:image/svg+xml,%3Csvg width="201" height="178" viewBox="0 0 201 178" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M130.703 0.507489L200.905 73.7829L170.78 162.297L70.4543 177.536L0.252615 104.26L30.3771 15.7463L130.703 0.507489Z" fill="%23000451" fill-opacity="0.2"/%3E%3C/svg%3E'),
+        url('data:image/svg+xml,%3Csvg width="201" height="178" viewBox="0 0 201 178" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M130.703 0.507489L200.905 73.7829L170.78 162.297L70.4543 177.536L0.252615 104.26L30.3771 15.7463L130.703 0.507489Z" fill="%23000451" fill-opacity="0.2"/%3E%3C/svg%3E');
+}
+.deskGrid {
+    display: grid;
+    grid-template-columns: 4fr repeat(5, 1fr);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(0, 4, 81, 1) 80%);
+    border: .7em solid black;
+    margin: .7em;
+    max-width: 70%;
+    font-size: 28px;
+}
+.deskGrid:has(p) {
+    grid-template-columns: auto;
+}
+.players {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 1em;
+    flex-wrap: wrap;
+    font-size: 20px;
+}
+@media (max-width:1280px) {
+    .deskGrid {
+        font-size: 24px;
+        max-width: 90%;
+    }
+}
+@media (max-width:768px) {
+    .deskGrid {
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+}
+@media (max-width:300px) {
+    .deskGrid {
+        font-size: 16px;
+    }
+}

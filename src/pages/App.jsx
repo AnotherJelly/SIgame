@@ -1,10 +1,12 @@
 import { useState, useEffect, useReducer } from "react";
 
-import CategoryGrid from "../components/CategoryGrid/CategoryGrid";
-import SettingsModal from "../components/SettingsModal/SettingsModal";
+import CategoryGrid from "../components/CategoryGrid/Main/Main";
+import SettingsModal from "../components/SettingsModal/Main/Main";
 import { validateRounds, validatePlayers } from "../utils/validate";
 import { fetchRounds, saveRounds } from "../services/api";
 import { playersReducer, initialPlayers } from "../hooks/playersReducer";
+import Modal from "../components/Modal/Modal";
+import Loading from "../components/Loading/Loading";
 
 export function App() {
 
@@ -15,16 +17,22 @@ export function App() {
     const [rounds, setRounds] = useState(exampleData);
     //const [rounds, setRounds] = useState([]);
 
+    const [error, setError] = useState({isError: false, textError: ""});
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         async function loadRounds() {
+            setIsLoading(true);
             try {
                 const data = await fetchRounds();
                 setRounds(data);
             } catch (err) {
                 console.error("Ошибка загрузки:", err);
+                setError({isError: true, textError: `Ошибка загрузки: ${err}`});
+            } finally {
+                setIsLoading(false);
             }
         }
-
         loadRounds();
     }, []);
 
@@ -33,24 +41,32 @@ export function App() {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
-    const handleSaveSettings = (newPlayers, newRounds) => {
+    const handleSaveSettings = async (newPlayers, newRounds) => {
 
         if (!validateRounds(newRounds)) {
             console.error('Ошибка: данные раундов некорректные. Отправка отменена.');
-            alert('Невозможно сохранить: проверьте все поля раундов, категорий и вопросов.');
+            setError({isError: true, textError: 'Невозможно сохранить: проверьте все поля раундов, категорий и вопросов.'});
             return;
         }
 
         if (!validatePlayers(newPlayers)) {
             console.error('Ошибка: данные игроков некорректные. Сохранение отменено.');
-            alert('Невозможно сохранить: проверьте все поля игроков.');
+            setError({isError: true, textError: 'Невозможно сохранить: проверьте все поля игроков.'});
             return;
         }
 
         dispatchPlayers({ type: 'SET', payload: newPlayers });
         setRounds(newRounds);
         
-        saveRounds(newRounds);
+        setIsLoading(true);
+        try {
+            await saveRounds(newRounds);
+        } catch (err) {
+            console.error("Ошибка сохранения:", err);
+            setError({isError: true, textError: `Ошибка сохранения: ${err}`});
+        } finally {
+            setIsLoading(false);
+        }
     
         closeModal();
     };
@@ -95,6 +111,19 @@ export function App() {
                 resetAnswers={handleResetAnswers}
             />
 
+            {error.isError ? 
+                <Modal
+                    closeModal={() => setError({isError: false, textError: ""})}
+                    isModalOpen={error.isError} 
+                    title="Ошибка"
+                >
+                    <div>{error.textError}</div>
+                </Modal>
+            : ''}
+
+            {isLoading ? 
+                <Loading/>
+            : ''}
         </div>
     );
 }

@@ -1,9 +1,10 @@
 import React, { useCallback } from "react";
 
-import { settings, generateId } from "../../utils/data";
-import { SettingsCategoryBlock } from "./SettingsCategoryBlock";
+import { settings, generateId } from "../../../utils/data";
+import { CategoryBlock } from "../CategoryBlock/CategoryBlock";
+import style from './RoundBlock.module.css';
 
-export const SettingsRoundBlock = React.memo(function SettingsRoundBlock({ newRounds, setNewRounds }) {
+export const RoundBlock = React.memo(function RoundBlock({ newRounds, setNewRounds }) {
     const removeRound = useCallback((id) => {
         setNewRounds(prev =>
             prev.filter(r => r.id !== id)
@@ -46,9 +47,9 @@ export const SettingsRoundBlock = React.memo(function SettingsRoundBlock({ newRo
     }, [setNewRounds]);
 
     return (
-        <div className="modal-content__players">
+        <div className={style.players}>
             {newRounds.map((round, roundIndex) => (
-                <SettingsCategoryBlock
+                <CategoryBlock
                     key={round.id}
                     id={round.id}
                     roundIndex={roundIndex}
@@ -59,7 +60,7 @@ export const SettingsRoundBlock = React.memo(function SettingsRoundBlock({ newRo
             ))}
             <button
                 onClick={addRound}
-                className="modal-content__btn--add modal-content__btn--wide"
+                className={`${style.buttonAdd} ${style.buttonWide}`}
                 disabled={newRounds.length >= settings.maxRounds}
             >
                 Добавить раунд

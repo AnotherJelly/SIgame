@@ -1,0 +1,28 @@
+
+.block {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.collapse {
+    margin: 3px;
+    padding: 3px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid black;
+    transition: .3s;
+}
+.collapse:hover {
+    background-color: #f9f9f9;
+}
+.question {
+    display: flex;
+    gap: 5px;
+    justify-content: space-around;
+    flex-direction: row;
+}

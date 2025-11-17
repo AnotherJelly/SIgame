@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import style from "./Timer.module.css";
 
 export function Timer({timer, isTimerPaused}) {
     const [time, setTime] = useState(timer);
@@ -12,5 +13,5 @@ export function Timer({timer, isTimerPaused}) {
         }
     }, [time, isTimerPaused]);
 
-    return <div className="timer">{time}</div>;
+    return <div className={style.timer}>{time}</div>;
 }

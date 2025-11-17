@@ -1,0 +1,45 @@
+.buttonBlock {
+    border: 1px solid white;
+}
+.buttonTable {
+    width: 100%;
+    cursor: pointer;
+    height: 100%;
+    margin: 0;
+    border: none;
+    background-color: inherit;
+    color: #3CFF00;
+    font-size: 1em;
+    transition: .3s;
+}
+.buttonTable:hover {
+    background-color: #050098;
+}
+.blinkingButton {
+    animation: blink 0.5s linear 0s infinite;
+}
+@keyframes blink {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+}
+@media (max-width:768px) {
+    .buttonBlock {
+        flex-basis: 20%;
+    }
+    .buttonTable {
+        padding: .2em;
+    }
+}
+@media (max-width:440px) {
+    .buttonBlock {
+        flex-basis: 33.33%;
+        min-height: 1.5em;
+    }
+}

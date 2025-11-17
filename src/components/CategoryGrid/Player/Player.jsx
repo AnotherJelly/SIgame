@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import style from "./Player.module.css";
 
 export const Player = React.memo(function Player({ 
     player, onAwardPoints, onDeductPoints, isQuestionSelected, setIsTimerPaused, 
@@ -21,7 +22,7 @@ export const Player = React.memo(function Player({
     };
     
     return (
-        <div className="player">
+        <div className={style.player}>
             {specialQuestionType === 'bet' && player.points > 0 && (
                 <input
                     type="number"
@@ -33,19 +34,19 @@ export const Player = React.memo(function Player({
             )}
             {isQuestionSelected && !(player.hasAnswered) && isCanAnswer && (
                 <>
-                    <div className="player-timer">
-                        <div className="player-timer__line" style={{
-                            animation: `slide-out ${answerTime}s linear forwards`
+                    <div className={style.playerTimer}>
+                        <div className={style.playerTimer_line} style={{
+                            animation: `${style.slideOut} ${answerTime}s linear forwards`
                         }}></div>
                     </div>
-                    <div className="block-icons">
+                    <div className={style.blockIcons}>
     
-                        <button className="button-icons" onClick={() => onAwardPoints(player.id)}>
-                            <i className="fas fa-check"></i>
+                        <button className={style.buttonIcons} onClick={() => onAwardPoints(player.id)}>
+                            ✔
                         </button>
                         
-                        <button className="button-icons" onClick={() => onDeductPoints(player.id)}>
-                            <i className="fas fa-times"></i>
+                        <button className={style.buttonIcons} onClick={() => onDeductPoints(player.id)}>
+                            ✖
                         </button>
     
                     </div>
@@ -55,10 +56,10 @@ export const Player = React.memo(function Player({
                 <textarea disabled={player.hasAnswered || isShowAnswer}></textarea>
             )*/}
             {isQuestionSelected && !isCanAnswer && !player.hasAnswered && (canBet || specialQuestionType !== "bet") && (
-                <button className="button-answer" onClick={handleCanAnswer}>Ответить</button>
+                <button className={style.buttonAnswer} onClick={handleCanAnswer}>Ответить</button>
             )}
-            <div className="player-block">{player.name}</div>
-            <div className="player-block player-block__score">{player.points}</div>
+            <div className={style.playerBlock}>{player.name}</div>
+            <div className={`${style.playerBlock_score} ${style.playerBlock}`}>{player.points}</div>
         </div>
     );
 },

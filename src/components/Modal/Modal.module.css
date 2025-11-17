@@ -1,0 +1,62 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+    z-index: 10;
+}
+.modalOverlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+.modalOverlay.open .modalContent {
+    padding: 20px;
+    opacity: 1;
+}
+.modalContent {
+    background-color: white;
+    border-radius: 10px;
+    max-width: 80%;
+    transition: .5s ease;
+    max-height: 80%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    opacity: 0;
+    z-index: 1;
+}
+.modalContent_title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 24px;
+    font-weight: 700;
+}
+.modalContent_title button {
+    border: none;
+    background: inherit;
+    cursor: pointer;
+    transition: .3s;
+}
+.modalContent_title button:active, .modalContent_title button:hover {
+    opacity: .7;
+}
+.modalBackground {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+@media (max-width:768px) {
+    .modalContent {
+        max-width: 100%;
+        max-height: 100%;
+    }
+}

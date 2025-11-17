@@ -1,0 +1,15 @@
+.question {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    width: 100%;
+}
+.question span {
+    font-weight: bold;
+    display: inline-block;
+    text-align: right;
+    margin-right: 10px;
+}
+.question input {
+    width: 100%;
+}

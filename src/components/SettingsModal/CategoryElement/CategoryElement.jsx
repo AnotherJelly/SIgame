@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { settings } from "../../utils/data";
-import { InputText } from "./InputText";
-import { InputWithDelete } from "./InputWithDelete";
+import { settings } from "../../../utils/data";
+import { InputText } from "../InputText/InputText";
+import { InputWithDelete } from "../InputWithDelete/InputWithDelete";
+import style from './CategoryElement.module.css';
 
-export function SettingsCategoryElement ( {category, catIndex, removeCategory, handleCategoryChange, roundIndex} ) {
+export function CategoryElement ( {category, catIndex, removeCategory, handleCategoryChange, roundIndex} ) {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const toggleCollapse = () => {
@@ -11,7 +12,7 @@ export function SettingsCategoryElement ( {category, catIndex, removeCategory, h
     };
 
     return (
-        <div className="modal-content__block" key={category.id}>
+        <div className={style.block} key={category.id}>
             <InputWithDelete 
                 id={category.id} 
                 value={category.name}
@@ -20,10 +21,10 @@ export function SettingsCategoryElement ( {category, catIndex, removeCategory, h
                 onChange={(e) => handleCategoryChange(category.id, e.target.value)}
                 onDelete={removeCategory}
             />
-            <button className="modal-content__collapse" onClick={toggleCollapse}>{isCollapsed ? 'Развернуть' : 'Свернуть'}</button>
+            <button className={style.collapse} onClick={toggleCollapse}>{isCollapsed ? 'Развернуть' : 'Свернуть'}</button>
             {!isCollapsed && category.questions.map((curQuestion, qIndex) => (
                 <React.Fragment key={curQuestion.id}>
-                    <div className="modal-content-block__question">
+                    <div className={style.question}>
                         <InputText
                             id={curQuestion.id}
                             text={`${100 * (roundIndex + 1) * (qIndex + 1)}:`}

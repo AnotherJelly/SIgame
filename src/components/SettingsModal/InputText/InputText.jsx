@@ -1,6 +1,8 @@
+import style from './InputText.module.css';
+
 export function InputText ( {id, text, value, placeholder, maxlength, onChange} ) {
     return (
-        <div key={id} className="modal-content-question">
+        <div key={id} className={style.question}>
             <span>{text}</span>
             <input
                 type="text"

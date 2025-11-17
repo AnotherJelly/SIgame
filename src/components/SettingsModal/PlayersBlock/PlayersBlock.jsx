@@ -1,10 +1,11 @@
 import React, { useEffect, useCallback } from "react";
 
-import { InputText } from "./InputText";
-import { InputWithDelete } from "./InputWithDelete";
-import { settings, generateId } from "../../utils/data";
+import { InputText } from "../InputText/InputText";
+import { InputWithDelete } from "../InputWithDelete/InputWithDelete";
+import { settings, generateId } from "../../../utils/data";
+import style from './PlayersBlock.module.css';
 
-export const SettingsPlayersBlock = React.memo(function SettingsPlayersBlock ( {playersData, newPlayers, setNewPlayers} ) {
+export const PlayersBlock = React.memo(function PlayersBlock ( {playersData, newPlayers, setNewPlayers} ) {
 
     useEffect(() => {
         setNewPlayers(playersData);
@@ -38,8 +39,8 @@ export const SettingsPlayersBlock = React.memo(function SettingsPlayersBlock ( {
     }, [setNewPlayers]);
 
     return (
-        <div className="modal-content__players">
-            <div className="modal-content__subtitle">
+        <div className={style.players}>
+            <div className={style.subtitle}>
                 <span>Игроки</span>
             </div>
             {newPlayers.map((player, index) => (
@@ -62,7 +63,7 @@ export const SettingsPlayersBlock = React.memo(function SettingsPlayersBlock ( {
                     />
                 </div>
             ))}
-            <button onClick={addPlayer} className="modal-content__btn--add" disabled={newPlayers.length > settings.maxPlayers}>
+            <button onClick={addPlayer} className={style.buttonAdd} disabled={newPlayers.length > settings.maxPlayers}>
                 Добавить игрока
             </button>
         </div>

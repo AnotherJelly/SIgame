@@ -1,7 +1,8 @@
-import { Timer } from "./Timer";
-import { Category } from "./Category";
+import { Timer } from "../Timer/Timer";
+import { Category } from "../Category/Category";
+import style from "./RenderTable.module.css";
 
-export function MainArea ({ 
+export function RenderTable ({ 
   showRoundIntro, specialLabel, selectedQuestion, roundIntroText, setSelectedQuestion, setSpecialLabel, isShowAnswer, isShowTimer, timer,
   isTimerPaused, handleShowAnswer, handleAnswer, isDisabledCloseBtn, categories, handleButtonClick, answeredQuestions, isButtonBlinking, activeRoundIndex
 }) {
@@ -49,19 +50,19 @@ function RenderSelectedQuestion ({ question, isShowAnswer, isShowTimer, timer, i
             <Timer timer={timer} isTimerPaused={isTimerPaused} />
         )}
 
-        <div className="question">
+        <div className={style.question}>
         {!isShowAnswer ? (
             <>
                 <p>{question.text}</p>
-                <button className="button" onClick={handleShowAnswer}>
+                <button className={style.button} onClick={handleShowAnswer}>
                     Показать ответ
                 </button>
             </>
         ) : (
             <>
-                <p className="answer-text">{question.answer}</p>
+                <p className={style.answerText}>{question.answer}</p>
                 <button
-                    className="button"
+                    className={style.button}
                     onClick={handleAnswer}
                     disabled={isDisabledCloseBtn}
                 >
@@ -76,16 +77,16 @@ function RenderSelectedQuestion ({ question, isShowAnswer, isShowTimer, timer, i
 
 function RenderRoundIntro ({ text }) {
   return (
-    <div className="question"><p>{text}</p></div>
+    <div className={style.question}><p>{text}</p></div>
   );
 };
 
 function RenderSpecialLabel ({ label, setSelectedQuestion, setSpecialLabel }) {
   return (
-    <div className="question">
-        <p className="special-label">{label.label}</p>
+    <div className={style.question}>
+        <p className="">{label.label}</p>
         <button
-            className="button"
+            className={style.button}
             onClick={() => {
                 setSelectedQuestion({ value: label.value, question: label.question });
                 setSpecialLabel(null);

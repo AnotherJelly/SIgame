@@ -1,16 +1,17 @@
-import { settings } from "../../utils/data";
-import { Player } from "./Player";
-import { useCategoryGrid } from "../../hooks/useCategoryGrid";
+import { settings } from "../../../utils/data";
+import { Player } from "../Player/Player";
+import { useCategoryGrid } from "../../../hooks/useCategoryGrid";
+import style from './Main.module.css';
 
 export default function CategoryGrid({ playersData, rounds, onAwardPoints, onDeductPoints, resetAnswers }) {
 
     const { state, setState, handlers, computed } = useCategoryGrid({ playersData, rounds, onAwardPoints, onDeductPoints, resetAnswers });
 
     return (
-        <div className="category-grid">
-            <div className="desk-grid">{computed.mainArea}</div>
+        <div className={style.categoryGrid}>
+            <div className={style.deskGrid}>{computed.renderTable}</div>
 
-            <div className="players">
+            <div className={style.players}>
                 {playersData.map((player) => (
                     <Player
                         key={player.id}

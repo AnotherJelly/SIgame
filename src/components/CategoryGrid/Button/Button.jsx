@@ -1,10 +1,11 @@
 import React from "react";
+import style from "./Button.module.css";
 
 export const Button = React.memo(function Button({ value, question, onClick, isButtonBlinking }) {
     return (
-        <div className="button-block">
+        <div className={style.buttonBlock}>
             <button
-                className={`button-table ${isButtonBlinking ? "blinking-button" : ""}`}
+                className={`${style.buttonTable} ${isButtonBlinking ? style.blinkingButton : ""}`}
                 onClick={() => onClick(value, question)}
             >
                 {value}

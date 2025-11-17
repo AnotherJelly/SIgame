@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 
 import { useRoundIntro } from "./useRoundIntro";
 import { settings } from "../utils/data";
-import { MainArea } from "../components/CategoryGrid/MainTable";
+import { RenderTable } from "../components/CategoryGrid/RenderTable/RenderTable";
 
 export function useCategoryGrid({ playersData, rounds, onAwardPoints, onDeductPoints, resetAnswers }) {
 
@@ -162,8 +162,8 @@ export function useCategoryGrid({ playersData, rounds, onAwardPoints, onDeductPo
       }
   }, [specialLabel]);
 
-  const mainArea = 
-    <MainArea
+  const renderTable = 
+    <RenderTable
       showRoundIntro={showRoundIntro} 
       specialLabel={specialLabel} 
       selectedQuestion={selectedQuestion}
@@ -188,6 +188,6 @@ export function useCategoryGrid({ playersData, rounds, onAwardPoints, onDeductPo
     state: { isQuestionSelected, isShowAnswer, specialLabel, bets },
     setState: { setIsTimerPaused, },
     handlers: { handleAward, handleDeduct, handleSpecialLabelStart, handleBetChange },
-    computed: { isEveryoneNull, mainArea },
+    computed: { isEveryoneNull, renderTable },
   };
 }

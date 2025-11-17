@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 
-import { SettingsCategoryElement } from "./SettingsCategoryElement";
-import { settings, generateId } from "../../utils/data";
+import { CategoryElement } from "../CategoryElement/CategoryElement";
+import { settings, generateId } from "../../../utils/data";
+import style from './CategoryBlock.module.css';
 
-export const SettingsCategoryBlock = React.memo(function SettingsCategoryBlock ( { id, roundIndex, categories, setNewCategories, removeRound } ) {
+export const CategoryBlock = React.memo(function CategoryBlock ( { id, roundIndex, categories, setNewCategories, removeRound } ) {
 
     const [isCollapsed, setIsCollapsed] = useState(false);
     
@@ -64,18 +65,21 @@ export const SettingsCategoryBlock = React.memo(function SettingsCategoryBlock (
     }, [categories, roundIndex, setNewCategories]);
 
     return (
-        <div className="modal-content__players">
-            <div className="modal-content__subtitle">
-                <div className="modal-content__subtitle--delete">
+        <div className={style.players}>
+            <div className={style.subtitle}>
+                <div className={style.subtitleDelete}>
                     <span>Раунд {roundIndex + 1}</span>
-                    <button className="" onClick={() => removeRound(id)}><i className="fas fa-times"></i></button>
+                    <button onClick={() => removeRound(id)}>✖</button>
                 </div>
-                <button className="modal-content__collapse" onClick={toggleCollapse}>{isCollapsed ? 'Развернуть' : 'Свернуть'}</button>
+                <button 
+                    className={style.collapse} 
+                    onClick={toggleCollapse}
+                >{isCollapsed ? 'Развернуть' : 'Свернуть'}</button>
             </div>
             {!isCollapsed && (
                 <>
                     {categories.map((category, catIndex) => (
-                        <SettingsCategoryElement
+                        <CategoryElement
                             key={category.id}
                             category={category}
                             catIndex={catIndex}
@@ -84,7 +88,11 @@ export const SettingsCategoryBlock = React.memo(function SettingsCategoryBlock (
                             roundIndex={roundIndex}
                         />
                     ))}
-                    <button onClick={addCategory} className="modal-content__btn--add" disabled={categories.length >= settings.maxCategories}>Добавить категорию</button>
+                    <button
+                        className={style.buttonAdd} 
+                        onClick={addCategory}
+                        disabled={categories.length >= settings.maxCategories}
+                    >Добавить категорию</button>
                 </>
             )}
         </div>
