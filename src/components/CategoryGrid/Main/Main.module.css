@@ -45,7 +45,7 @@
         max-width: 100%;
     }
 }
-@media (max-width:300px) {
+@media (max-width:340px) {
     .deskGrid {
         font-size: 16px;
     }

@@ -2,6 +2,34 @@
     overflow-y: auto;
     width: calc(80vw - 40px);
 }
+.fileButtons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+}
+.fileButtons > :nth-child(2) {
+    justify-self: end;
+}
+.fileExport input[type="file"] {
+  display: none;
+}
+.fileExport {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+    background-color: rgba(76, 175, 80, .8);
+    border: none;
+    border-radius: 4px;
+    max-width: 50%;
+    padding: 5px 15px;
+    font-size: 14px;
+    transition: all .5s;
+    width: 100%;
+}
+.fileExport:hover:not(:disabled) {
+    max-width: 100%;
+}
 .buttonSave {
     background-color: #4CAF50;
     color: white;
@@ -10,7 +38,6 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 20px;
     text-align: center;
     width: 100%;
     transition: all .5s ease;
@@ -42,5 +69,8 @@
 @media (max-width:768px) {
     .main {
         width: calc(100vw - 40px);
+    }
+    .fileButtons {
+        grid-template-columns: 1fr;
     }
 }

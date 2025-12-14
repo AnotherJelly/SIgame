@@ -5,31 +5,51 @@ body {
     margin: 0;
 }
 
-.button-setting {
-    background-color: #4CAF50;
+.button-default {
+    display: flex;
+    align-items: flex-start;
+    background-color: rgba(76, 175, 80, .8);
     color: white;
     border: none;
     padding: .7em 1.3em;
     text-align: center;
     text-decoration: none;
-    display: inline-block;
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
+}
+.button-default:hover {
+    background-color: #45a049;
+}
+.button-setting, .button-discard {
     position: absolute;
-    transform: translate(10px, 10px);
     z-index: 1;
 }
+.button-setting {
+    transform: translate(10px, 10px);
+}
 .button-setting:hover {
-    background-color: #45a049;
     transform: scale(1.1) translate(10px, 10px);
 }
-.button-setting:active {
+.button-setting:hover svg {
+   transform: rotate(360deg); 
+}
+.button-default:active {
     background-color: #387940;
+}
+.button-setting svg {
+    fill: #fff;
+    width: 1em;
+    height: 1em;
+    transition: .4s ease;
 }
 .button-setting span {
     margin-left: .5em;
+}
+.button-discard {
+    right: 0;
+    transform: translate(-10px, 10px);
 }
 @media (max-width:768px) {
     .button-setting span {
@@ -37,7 +57,7 @@ body {
     }
 }
 @media (max-width:440px) {
-    .button-setting {
+    .button-default {
         font-size: 12px;
     }
 }

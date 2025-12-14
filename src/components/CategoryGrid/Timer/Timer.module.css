@@ -15,7 +15,6 @@
     .timer {
         font-size: 20px;
         border: 1px solid #fff;
-        top: 0;
         transform: translate(-15%, 15%);
     }
 }

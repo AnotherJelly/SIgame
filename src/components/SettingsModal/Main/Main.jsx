@@ -4,8 +4,9 @@ import { PlayersBlock } from "../PlayersBlock/PlayersBlock";
 import { RoundBlock } from "../RoundBlock/RoundBlock";
 import Modal from "../../Modal/Modal";
 import style from './Main.module.css';
+import { handleExport, handleImport } from "../../../services/files";
 
-export default function SettingsModal ({ rounds, playersData, handleSaveSettings, closeModal, isModalOpen }) {
+export default function SettingsModal ({ rounds, playersData, handleSaveSettings, closeModal, isModalOpen, setError }) {
 
     const [newRounds, setNewRounds] = useState(rounds);
     const [newPlayers, setNewPlayers] = useState(playersData);
@@ -34,6 +35,16 @@ export default function SettingsModal ({ rounds, playersData, handleSaveSettings
                     newRounds={newRounds}
                     setNewRounds={setNewRounds}
                 />
+            </div>
+            
+            <div className={style.fileButtons}>
+                <label className={style.fileExport}>
+                    Импорт
+                    <input type="file" onChange={(e) => handleImport(e, setNewRounds, setError)}  />
+                </label>
+                <button className={style.fileExport} type="button" onClick={(e) => handleExport(e, newRounds, setError)}>
+                    Экспорт
+                </button>
             </div>
 
             <button 

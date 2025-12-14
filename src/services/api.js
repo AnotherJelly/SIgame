@@ -1,5 +1,5 @@
-const url = "http://localhost:5000/rounds";
-// const url = "https://svoyak.dobryakov.me/rounds";
+// const url = "http://localhost:5000/rounds";
+const url = "https://svoyak.dobryakov.me/rounds";
 
 export async function fetchRounds() {
     const res = await fetch(url);

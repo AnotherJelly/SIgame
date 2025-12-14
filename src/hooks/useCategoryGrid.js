@@ -7,7 +7,10 @@ import { RenderTable } from "../components/CategoryGrid/RenderTable/RenderTable"
 export function useCategoryGrid({ playersData, rounds, onAwardPoints, onDeductPoints, resetAnswers }) {
 
   const [selectedQuestion, setSelectedQuestion] = useState(null);
-  const [answeredQuestions, setAnsweredQuestions] = useState([]);
+  const [answeredQuestions, setAnsweredQuestions] = useState(()=>{
+    const saved = localStorage.getItem("answeredQuestions");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isButtonBlinking, setIsButtonBlinking] = useState(null);
   const [isQuestionSelected, setIsQuestionSelected] = useState(null);
 
@@ -15,8 +18,15 @@ export function useCategoryGrid({ playersData, rounds, onAwardPoints, onDeductPo
   const [isShowTimer, setIsShowTimer] = useState(true);
   const [isDisabledCloseBtn, setIsDisabledCloseBtn] = useState(false);
 
-  const [activeRoundIndex, setActiveRoundIndex] = useState(0);
-  const [roundIntroText, setRoundIntroText] = useState('Раунд 1');
+  const [activeRoundIndex, setActiveRoundIndex] = useState(() => {
+    const saved = localStorage.getItem("activeRoundIndex");
+    return saved ? JSON.parse(saved) : 0;
+  });
+  const [roundIntroText, setRoundIntroText] = useState(() => {
+    const saved = localStorage.getItem("activeRoundIndex");
+    const index = saved ? JSON.parse(saved) : 0;
+    return index === 0 ? "Раунд 1" : `Раунд ${index + 1}`;
+  });
   const showRoundIntro = useRoundIntro(roundIntroText, settings.roundIntroPause);
 
   const [isTimerPaused, setIsTimerPaused] = useState(false);
@@ -41,12 +51,32 @@ export function useCategoryGrid({ playersData, rounds, onAwardPoints, onDeductPo
   );
 
   useEffect(() => {
+    localStorage.setItem("answeredQuestions", JSON.stringify(answeredQuestions));
+  }, [answeredQuestions]);
+
+  useEffect(() => {
+    localStorage.setItem("activeRoundIndex", JSON.stringify(activeRoundIndex));
+  }, [activeRoundIndex]);
+
+  useEffect(()=>{
+    const savedAnsweredQuestions = localStorage.getItem("answeredQuestions");
+    const savedActiveRoundIndex = localStorage.getItem("activeRoundIndex");
+    if (savedAnsweredQuestions) setAnsweredQuestions(JSON.parse(savedAnsweredQuestions));
+    if (savedActiveRoundIndex) {
+        const index = JSON.parse(savedActiveRoundIndex);
+        setActiveRoundIndex(index);
+        setRoundIntroText(index === 0 ? "Раунд 1" : `Раунд ${index + 1}`);
+    }
+  }, [rounds]);
+
+  useEffect(() => {
       const allAnswered = currentRoundQuestions.every(q => answeredQuestions.includes(q.id));
-  
+      
       if (allAnswered && activeRoundIndex < rounds.length - 1) {
           nextRound();
-      } else if (allAnswered && activeRoundIndex == rounds.length - 1) {
-          setActiveRoundIndex(idx => idx + 1);
+      } else if (allAnswered && activeRoundIndex == rounds.length) {
+          setRoundIntroText(`Вопросы отсутствуют`);
+      } else if (allAnswered && activeRoundIndex >= rounds.length - 1) {
           setRoundIntroText(`Конец игры`);
       }
   }, [currentRoundQuestions, answeredQuestions, activeRoundIndex, rounds]);  
