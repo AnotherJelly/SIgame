@@ -1,24 +1,52 @@
 import { validateRounds } from "../utils/validate";
+import { settings } from '../utils/data';
 
 export const handleImport = (event, setNewRounds, setError) => {
   const file = event.target.files[0];
   if (!file) return;
 
+  if (file.size > settings.maxPackageSize) {
+    const limitMb = (settings.maxPackageSize / (1024 * 1024)).toFixed(0);
+    console.error("Файл превышает допустимый размер.");
+    setError({
+      isError: true,
+      textError: `Файл слишком большой: превышен предел ${limitMb} МБ.`,
+    });
+    event.target.value = "";
+    return;
+  }
+
   const reader = new FileReader();
+
+  reader.onerror = () => {
+    console.error("Ошибка чтения файла:", reader.error);
+    setError({ isError: true, textError: "Не удалось прочитать файл." });
+  };
 
   reader.onload = (e) => {
     try {
       const json = JSON.parse(e.target.result);
 
-      localStorage.setItem("rounds", JSON.stringify(json));
+      try {
+        localStorage.setItem("rounds", JSON.stringify(json));
+      } catch (storageErr) {
+        console.error("Ошибка записи в локальное хранилище:", storageErr);
+        setError({
+          isError: true,
+          textError: "Пакет не помещается в локальное хранилище браузера.",
+        });
+        return;
+      }
+
       setNewRounds(json);
     } catch (err) {
       console.error("Ошибка чтения файла:", err);
-      setError({isError: true, textError: `Ошибка чтения файла: ${err}`});
+      setError({ isError: true, textError: `Ошибка чтения файла: ${err}` });
     }
   };
 
   reader.readAsText(file);
+  event.target.value = "";
 };
 
 

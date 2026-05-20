@@ -8,7 +8,8 @@ export const settings = {
     maxLengthQuestion: 150,
     timer: 60,
     roundIntroPause: 3000, // 3 sec
-    answerTime: 15
+    answerTime: 15,
+    maxPackageSize: 2 * 1024 * 1024 // 2 MB
 };
 
 export const generateId = () => Math.random().toString(36).slice(2, 11);
